@@ -167,6 +167,7 @@
   }
   .badge-bfc{background:var(--crimson-light);color:var(--crimson-dark);}
   .badge-ufc{background:var(--ufc-blue-light);color:var(--ufc-blue);}
+  .badge-bfc-elected{background:#fbe9c8;color:#8a5a00;}
   .ext-link{font-size:12.5px;color:var(--crimson);text-decoration:none;margin-left:auto;}
   .ext-link:hover{text-decoration:underline;}
   .charge{color:var(--ink-soft);font-size:14px;line-height:1.55;margin:6px 0 22px;}
@@ -285,6 +286,13 @@
   .chip.active{background:var(--crimson);border-color:var(--crimson);color:#fff;}
   .grid-section-label{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);font-weight:700;margin:22px 0 4px;}
   .grid-section-label:first-of-type{margin-top:22px;}
+  .ref-list{list-style:none;margin:10px 0 0;padding:0;}
+  .ref-list li{
+    padding:9px 12px;border:1px solid var(--line);border-radius:8px;
+    margin-bottom:7px;font-size:13.5px;background:var(--cream);
+  }
+  .ref-list li a{color:var(--ufc-blue);font-weight:600;text-decoration:none;}
+  .ref-list li a:hover{text-decoration:underline;}
 </style>
 </head>
 <body>
@@ -543,8 +551,13 @@ const SEED_CHAIRS = [
   {id:'ufc-aa',     name:'Chad Lochmiller, Krista Hoffmann-Longtin, Tanya Perkins', email:'clochmil@iu.edu, talperk@iu.edu'},
   {id:'ufc-ba',     name:'Mark Baer, Ann Holmes',                            email:'mcbaer@iu.edu, aholmes@iu.edu'},
   {id:'ufc-ec',     name:'Heather Akou, Kathy Marrs, Alan Krabbenhoft',      email:'hakou@iu.edu, kmarrs@iu.edu, agkrabbe@iu.edu'},
-  {id:'ufc-oe',     name:'Shawn Nichols-Boyle, Natalia Rybas',               email:'sfnichol@iu.edu'}
+  {id:'ufc-oe',     name:'Shawn Nichols-Boyle, Natalia Rybas',               email:'sfnichol@iu.edu'},
   /* ufc-fa, ufc-ra, ufc-hd, ufc-sa, ufc-tp: no chair publicly listed as of the seed date — see the seeded note on each page. */
+  {id:'bfc-fmc',    name:'Katie Metz',                                       email:'kmetz@iu.edu'},
+  {id:'bfc-fbor',   name:'David McDonald',                                   email:'davmcdon@iu.edu'},
+  {id:'bfc-fmrc',   name:'Seda Durguner',                                    email:''},
+  {id:'bfc-saabor', name:'Spencer Hall',                                     email:'sprhall@iu.edu'},
+  {id:'bfc-ac',     name:'Rebecca Butters',                                  email:'rebutter@iu.edu'}
 ];
 const SEED_NOTES = [
   {id:'bfc-epc',   body:"Research note (Aug 2026): Connie Cook's public directory email (cglen@iu.edu) has a username that doesn't match her surname — worth a quick verification before relying on it for official correspondence."},
@@ -557,7 +570,8 @@ const SEED_NOTES = [
   {id:'ufc-hd',    body:"Research note (Aug 2026): no chair is publicly listed. Per policy ACA-62 the chair is selected by the UFC Executive Committee — ask the UFC office for the current holder."},
   {id:'ufc-oe',    body:"Research note (Aug 2026): Online Education runs as a subcommittee under UFC Academic Affairs rather than a standalone committee. No confirmed public email was found for co-chair Natalia Rybas (IU East)."},
   {id:'ufc-sa',    body:"Research note (Aug 2026): no chair is publicly listed for this committee on the UFC site — ask the UFC office or a fellow UFC representative."},
-  {id:'ufc-tp',    body:"Research note (Aug 2026): no chair is publicly listed for this committee on the UFC site — ask the UFC office or a fellow UFC representative."}
+  {id:'ufc-tp',    body:"Research note (Aug 2026): no chair is publicly listed for this committee on the UFC site — ask the UFC office or a fellow UFC representative."},
+  {id:'bfc-fmrc',  body:"⚠ Research note (Aug 2026): the Elected Committees page lists this chair as \"Seda Durguner (Kelley School of Business)\", but Kelley's faculty directory has two very similarly-named Clinical Associate Professors of Finance — \"Seda Durguner\" and \"Sena Durguner\" — and neither public profile lists an email address. No email has been seeded here; please confirm the correct person and email with the BFC office before relying on this contact."}
 ];
 
 const BFC_OFFICE = {
@@ -599,12 +613,57 @@ const UFC_COMMITTEES = [
   {id:'ufc-tp', abbr:'TP', name:'Technology Policy', charge:'Oversees technology standards and digital infrastructure matters university-wide.', url:'https://ufc.iu.edu/committees/tpc.html'}
 ];
 
+const BFC_ELECTED_COMMITTEES = [
+  {id:'bfc-fmc',    abbr:'FMC',    name:'Faculty Mediation Committee', charge:'Serves all faculty and librarians by hearing their concerns and supporting efforts towards informal resolution of grievances.', url:'https://bfc.indiana.edu/committees/elected/index.html'},
+  {id:'bfc-fbor',   abbr:'FBoR',   name:'Faculty Board of Review', charge:'Hears appeals regarding sanctions for misconduct and other adverse administrative decisions, including promotion denials and terminations.', url:'https://bfc.indiana.edu/committees/elected/index.html'},
+  {id:'bfc-fmrc',   abbr:'FMRC',   name:'Faculty Misconduct Review Committee', charge:'Serves as an oversight body in situations where faculty may be sanctioned for misconduct; can offer advocates to faculty and verify facts.', url:'https://bfc.indiana.edu/committees/elected/index.html'},
+  {id:'bfc-saabor', abbr:'SAABoR', name:'Student Academic Appointee Board of Review', charge:'Reviews graduate student grievances and complaints related to the terms and conditions of their academic appointments.', url:'https://bfc.indiana.edu/committees/elected/index.html'},
+  {id:'bfc-ac',     abbr:'AC',     name:'Athletics Committee', charge:'Participates in the oversight of intercollegiate athletics programs and develops policies related to student athletes in collaboration with other committees.', url:'https://bfc.indiana.edu/committees/elected/index.html'}
+];
+
+const LEVEL_LABELS = {BFC:'BFC', UFC:'UFC', 'BFC-ELECTED':'BFC ELECTED'};
+
 const ALL_COMMITTEES = [
   ...BFC_COMMITTEES.map(c=>({...c, level:'BFC'})),
+  ...BFC_ELECTED_COMMITTEES.map(c=>({...c, level:'BFC-ELECTED'})),
   ...UFC_COMMITTEES.map(c=>({...c, level:'UFC'}))
 ];
 const byId = Object.fromEntries(ALL_COMMITTEES.map(c=>[c.id,c]));
 const BFCWIDE_ID = 'bfcwide';
+
+/* Reference/agenda pages: not committees, but tracked lists with their own dated notes
+   (same notes mechanism as committee pages, keyed by these ids in the notes table). */
+const SPECIAL_PAGES = [
+  {id:'coordination', navIcon:'🤝', navLabel:'Coordination', title:'Coordination', intro:'External organizations the BFC coordinates and communicates with.', items:[
+    {label:'National Council of Faculty Senates (NCFS)', url:'https://ncfs18.org/'},
+    {label:'Big Ten Academic Alliance', url:'https://btaa.org/'},
+    {label:'AAUP', url:'https://www.aaup.org/'}
+  ]},
+  {id:'bot-policies', navIcon:'📋', navLabel:'BOT Policies', title:'BOT Policies', intro:"Policy chairs' agenda — policy topics currently in progress.", items:[
+    {label:'AI usage in syllabi'}
+  ]},
+  {id:'iub-issues', navIcon:'🏫', navLabel:'IUB Issues', title:'IUB Issues', intro:'Campus-level issues and initiatives being tracked this term.', items:[
+    {label:'Spread 10-month contracts over 12 months'},
+    {label:'Create a "Muslim Philanthropy Initiative"'},
+    {label:'Clarify who can vote on PT cases and guidelines for external reviewers', url:'https://vpfaa.indiana.edu/policies/bl-aca-e1-promotion-tenure-principles-policies/index.html'}
+  ]},
+  {id:'state-national', navIcon:'🏛️', navLabel:'State / National Issues', title:'State / National Issues', intro:'Issues originating outside IU Bloomington that affect the faculty.', items:[
+    {label:'Changes to "duration of status" rule'}
+  ]}
+];
+const SPECIAL_PAGE_IDS = SPECIAL_PAGES.map(p=>p.id);
+const specialPageById = Object.fromEntries(SPECIAL_PAGES.map(p=>[p.id,p]));
+
+const PRESIDENT_ELECT_DUTIES = [
+  'To serve, along with the Presiding Officer, President, the Past President, the Secretary, and the Parliamentarian, as an officer of the Bloomington Faculty. (Article III, Section 3.1, Constitution of the Bloomington Faculty)',
+  'To serve as a member of the Executive Committee of the Bloomington Faculty Council.',
+  'To serve as a BFC representative to the University Faculty Council.',
+  'To preside at meetings of the Executive Committee in the absence of the President.',
+  'To preside at meetings of the Bloomington Faculty Council in the absence of the University President, the Provost, and the President.',
+  'To substitute temporarily for the President in the execution of the duties specified in Bylaw 10, when unavoidable circumstances prohibit them from fulfilling those obligations.',
+  'To serve as Chair of the Nomination Committee.',
+  'To be the liaison between the Executive Committee and the standing committees.'
+];
 
 /* ---------------- SQLite engine (sql.js) ---------------- */
 
@@ -764,7 +823,9 @@ function committeesWithChairCount(){
   return row ? row.c : 0;
 }
 function committeesWithNotesCount(){
-  const row = queryOne("SELECT COUNT(DISTINCT committee_id) as c FROM notes WHERE committee_id != ?", [BFCWIDE_ID]);
+  const excluded = [BFCWIDE_ID, ...SPECIAL_PAGE_IDS];
+  const placeholders = excluded.map(()=>'?').join(',');
+  const row = queryOne(`SELECT COUNT(DISTINCT committee_id) as c FROM notes WHERE committee_id NOT IN (${placeholders})`, excluded);
   return row ? row.c : 0;
 }
 
@@ -1063,7 +1124,7 @@ const FILTERS = [
 
 function matchesFilter(c, level){
   switch(activeFilter){
-    case 'bfc': return level === 'BFC';
+    case 'bfc': return level === 'BFC' || level === 'BFC-ELECTED';
     case 'ufc': return level === 'UFC';
     case 'notes': return noteCount(c.id) > 0;
     case 'nochair': return !getChair(c.id).chairEmail;
@@ -1102,14 +1163,25 @@ function renderSidebar(){
     html += `<div class="nav-group-label">BFC Standing Committees</div>`;
     html += bfcFiltered.map(c=>navItem(c.id, c.name, committeeHasData(c.id), c.abbr)).join('');
   }
+  const electedFiltered = BFC_ELECTED_COMMITTEES.filter(filterFn('BFC-ELECTED'));
+  if(electedFiltered.length){
+    html += `<div class="nav-group-label">BFC Elected Committees</div>`;
+    html += electedFiltered.map(c=>navItem(c.id, c.name, committeeHasData(c.id), c.abbr)).join('');
+  }
   const ufcFiltered = UFC_COMMITTEES.filter(filterFn('UFC'));
   if(ufcFiltered.length){
     html += `<div class="nav-group-label">UFC Standing Committees</div>`;
     html += ufcFiltered.map(c=>navItem(c.id, c.name, committeeHasData(c.id), c.abbr)).join('');
   }
-  if(!bfcFiltered.length && !ufcFiltered.length){
+  if(!bfcFiltered.length && !electedFiltered.length && !ufcFiltered.length){
     const reason = term ? `match "${escapeHtml(searchTerm)}"` : 'match this filter';
     html += `<div style="padding:14px 16px;font-size:12.5px;color:var(--ink-soft);">No committees ${reason}.</div>`;
+  }
+
+  const showRef = activeFilter==='all' || activeFilter==='bfc' || (activeFilter==='notes' && SPECIAL_PAGES.some(p=>noteCount(p.id) > 0));
+  if(showRef && !term){
+    html += `<div class="nav-group-label">Agenda &amp; Coordination</div>`;
+    html += SPECIAL_PAGES.map(p=>navItem(p.id, `${p.navIcon} ${p.navLabel}`, noteCount(p.id) > 0)).join('');
   }
   nav.innerHTML = html;
 
@@ -1141,7 +1213,7 @@ function selectTab(id){
 
 function initTab(){
   const hashTab = (location.hash || '').slice(1);
-  const startTab = (hashTab === 'home' || hashTab === 'bfcwide' || byId[hashTab]) ? hashTab : 'home';
+  const startTab = (hashTab === 'home' || hashTab === 'bfcwide' || byId[hashTab] || specialPageById[hashTab]) ? hashTab : 'home';
   currentTab = startTab;
   renderSidebar();
   renderMain();
@@ -1171,6 +1243,12 @@ function renderMain(){
   const main = document.getElementById('main');
   if(currentTab==='home'){ main.innerHTML = renderHome(); attachHomeListeners(); return; }
   if(currentTab==='bfcwide'){ main.innerHTML = renderBfcWide(); attachNotesListeners(BFCWIDE_ID); attachBfcWideExtras(); return; }
+  if(SPECIAL_PAGE_IDS.includes(currentTab)){
+    const p = specialPageById[currentTab];
+    main.innerHTML = renderSpecialPage(p);
+    attachNotesListeners(p.id);
+    return;
+  }
   const c = byId[currentTab];
   if(!c){ main.innerHTML = '<p>Not found.</p>'; return; }
   main.innerHTML = renderCommittee(c);
@@ -1201,7 +1279,23 @@ function renderHome(){
     </div>`;
   }
   const bfcTiles = BFC_COMMITTEES.map(c=>tileFor({...c, level:'BFC'})).join('');
+  const electedTiles = BFC_ELECTED_COMMITTEES.map(c=>tileFor({...c, level:'BFC-ELECTED'})).join('');
   const ufcTiles = UFC_COMMITTEES.map(c=>tileFor({...c, level:'UFC'})).join('');
+
+  const refTiles = SPECIAL_PAGES.map(p=>{
+    const n = noteCount(p.id);
+    const upd = formatDateShort(lastUpdatedFor(p.id));
+    return `<div class="tile" data-id="${p.id}">
+      <div class="tname">${p.navIcon} <span style="font-weight:400;color:var(--ink-soft);">— ${escapeHtml(p.navLabel)}</span></div>
+      <div class="tstat">
+        <span>${p.items.length} tracked item${p.items.length===1?'':'s'}</span>
+        <span class="${n>0?'on':''}">${n} note${n===1?'':'s'}</span>
+        ${upd?`<span>upd ${upd}</span>`:''}
+      </div>
+    </div>`;
+  }).join('');
+
+  const dutiesList = PRESIDENT_ELECT_DUTIES.map(d=>`<li>${escapeHtml(d)}</li>`).join('');
 
   const profile = getProfile();
   const globalUpd = globalLastUpdated();
@@ -1256,14 +1350,27 @@ function renderHome(){
         <div class="actions">
           <button class="btn" onclick="window.open('https://bfc.indiana.edu/committees/index.html','_blank')">BFC Committees Site ↗</button>
           <button class="btn" onclick="window.open('https://ufc.iu.edu/committees/index.html','_blank')">UFC Committees Site ↗</button>
+          <button class="btn" onclick="window.open('https://bfc.indiana.edu/membership/index.html','_blank')">BFC Members Roster ↗</button>
         </div>
+      </div>
+
+      <div class="card">
+        <h2>President-Elect Duties (Reference)</h2>
+        <ul class="ref-list">${dutiesList}</ul>
+        <div class="note-small">From the Constitution and Bylaws of the Bloomington Faculty. Kept here for reference regardless of who currently holds the role — update "Your Profile" above as roles rotate.</div>
       </div>
 
       <div class="grid-section-label">BFC Standing Committees</div>
       <div class="grid">${bfcTiles}</div>
 
+      <div class="grid-section-label">BFC Elected Committees</div>
+      <div class="grid">${electedTiles}</div>
+
       <div class="grid-section-label">UFC Standing Committees</div>
       <div class="grid">${ufcTiles}</div>
+
+      <div class="grid-section-label">Agenda &amp; Coordination</div>
+      <div class="grid">${refTiles}</div>
     </div>
   `;
 }
@@ -1294,7 +1401,7 @@ function renderCommittee(c){
   return `
     <div class="page">
       <div class="page-head">
-        <span class="badge badge-${c.level.toLowerCase()}">${c.level}</span>
+        <span class="badge badge-${c.level.toLowerCase()}">${LEVEL_LABELS[c.level] || c.level}</span>
         <h1>${escapeHtml(c.name)}</h1>
         <a class="ext-link" href="${c.url}" target="_blank" rel="noopener">Committee page ↗</a>
       </div>
@@ -1377,6 +1484,27 @@ function attachBfcWideExtras(){
     const body = encodeURIComponent(`Hello ${BFC_OFFICE.director.split(',')[0]},\n\nCould you please distribute the following message to the BFC Council?\n\n---\n[Your message here]\n---\n\nThank you,\n${profile.name}\n${profile.role}, ${profile.org}`);
     window.location.href = `mailto:${cleanEmailList(BFC_OFFICE.email)}?subject=${subject}&body=${body}`;
   });
+}
+
+function renderSpecialPage(p){
+  const upd = lastUpdatedFor(p.id);
+  const items = p.items.map(it=>
+    `<li>${it.url ? `<a href="${it.url}" target="_blank" rel="noopener">${escapeHtml(it.label)} ↗</a>` : escapeHtml(it.label)}</li>`
+  ).join('');
+  return `
+    <div class="page">
+      <div class="page-head"><h1>${escapeHtml(p.title)}</h1></div>
+      <p class="charge">${escapeHtml(p.intro)}</p>
+      ${upd ? `<div class="note-small" style="margin:-14px 0 20px;">Last updated ${formatDateTime(upd)}</div>` : ''}
+
+      <div class="card">
+        <h2>Tracked Items</h2>
+        <ul class="ref-list">${items}</ul>
+      </div>
+
+      ${renderNotesSection(p.id, `Notes, status, next steps for ${escapeHtml(p.title)}...`)}
+    </div>
+  `;
 }
 
 /* ---------------- Notes section (shared by committee pages + BFC-wide) ---------------- */
