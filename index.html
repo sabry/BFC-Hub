@@ -4,6 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>BFC Administration Hub</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='32' fill='%23990000'/%3E%3Ctext x='32' y='41' font-family='Georgia,serif' font-size='24' font-weight='bold' fill='%23ffffff' text-anchor='middle'%3EBFC%3C/text%3E%3C/svg%3E">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="theme-color" content="#990000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="BFC Hub">
 <style>
   :root{
     --crimson:#990000;
@@ -489,12 +496,54 @@ else if (typeof exports === 'object'){
 
 /* ---------------- Static reference data ---------------- */
 
-const TERM = {
+const DEFAULT_PROFILE = {
   name: "Amr Sabry",
   role: "President-Elect",
   org: "Bloomington Faculty Council",
   termLabel: "2026 – 2029"
 };
+
+/* Chair names/emails researched from official bfc.indiana.edu / ufc.iu.edu pages (and IU's
+   public directory for individual emails) on the SEED_DATE below. These are seeded once —
+   INSERT OR IGNORE means they never overwrite anything you've already typed yourself, and you
+   can edit any of them at any time as chairs rotate each year. */
+const SEED_DATE = "2026-08-15T00:00:00.000Z";
+const SEED_CHAIRS = [
+  {id:'bfc-ben',    name:'Cheryl Hughes, Amy Minix',                         email:'ckhughes@iu.edu, alminix@iu.edu'},
+  {id:'bfc-bac',    name:'Xin Chen, Dominick DiOrio, Andrew Hopson',         email:'chen437@iu.edu, ddiorio@iu.edu, anhopson@iu.edu'},
+  {id:'bfc-carc',   name:'David Cartledge, Sandy Washburn',                  email:'docartle@iu.edu, swashbur@iu.edu'},
+  {id:'bfc-crem',   name:'Christi Walton',                                   email:'waltoncl@iu.edu'},
+  {id:'bfc-deic',   name:'Julie Hardesty',                                   email:'jlhardes@iu.edu'},
+  {id:'bfc-epc',    name:'Connie Cook, Angie Perry',                         email:'cglen@iu.edu, perryal@iu.edu'},
+  {id:'bfc-ec',     name:'Heather Akou (BFC President)',                     email:'hakou@iu.edu'},
+  {id:'bfc-fac',    name:'Jeremy Allen, Diane Henshel',                      email:'jlallen@iu.edu, dhenshel@iu.edu'},
+  {id:'bfc-iac',    name:'Francesco Marchionne, Manuel Diaz-Campos',         email:'fmarchio@iu.edu, mdiazcam@iu.edu'},
+  {id:'bfc-lib',    name:'Adam Mazel, Alexis Peirce Caudell',                email:'amazel@iu.edu, abpeirce@iu.edu'},
+  {id:'bfc-lrpc',   name:'Bill Ramos (BFC Past President)',                  email:'wramos@iu.edu'},
+  {id:'bfc-nomcom', name:'Amr Sabry (BFC President-Elect)',                  email:'sabry@iu.edu'},
+  {id:'bfc-rac',    name:'Daniel Kearns, Katie Siek',                        email:'dbkearns@iu.edu, ksiek@iu.edu'},
+  {id:'bfc-sac',    name:'Heather Eastman-Mueller, Catherine Sherwood-Laughlin, Joe Varga', email:'heastman@iu.edu, csherwoo@iu.edu'},
+  {id:'bfc-saaac',  name:'Spencer Hall, Matthew Jackson',                    email:'sprhall@iu.edu'},
+  {id:'bfc-tpc',    name:'Alexander Alexeev, Jeremy Siek',                   email:'aalexeev@iu.edu, jsiek@iu.edu'},
+  {id:'ufc-aa',     name:'Chad Lochmiller, Krista Hoffmann-Longtin, Tanya Perkins', email:'clochmil@iu.edu, talperk@iu.edu'},
+  {id:'ufc-ba',     name:'Mark Baer, Ann Holmes',                            email:'mcbaer@iu.edu, aholmes@iu.edu'},
+  {id:'ufc-ec',     name:'Heather Akou, Kathy Marrs, Alan Krabbenhoft',      email:'hakou@iu.edu, kmarrs@iu.edu, agkrabbe@iu.edu'},
+  {id:'ufc-oe',     name:'Shawn Nichols-Boyle, Natalia Rybas',               email:'sfnichol@iu.edu'}
+  /* ufc-fa, ufc-ra, ufc-hd, ufc-sa, ufc-tp: no chair publicly listed as of the seed date — see the seeded note on each page. */
+];
+const SEED_NOTES = [
+  {id:'bfc-epc',   body:"Research note (Aug 2026): Connie Cook's public directory email (cglen@iu.edu) has a username that doesn't match her surname — worth a quick verification before relying on it for official correspondence."},
+  {id:'bfc-sac',   body:"Research note (Aug 2026): no public directory email could be confirmed for co-chair Joe Varga (School of Social Work). Ask the BFC office or a fellow committee member for his current contact."},
+  {id:'bfc-saaac', body:"Research note (Aug 2026): no public directory email could be confirmed for co-chair Matthew Jackson (GPSG-SAA representative, likely a graduate student). Ask the BFC office for his current contact."},
+  {id:'ufc-aa',    body:"Research note (Aug 2026): UFC's page for this committee was still showing what appears to be the 2025-2026 roster; the 2026-2027 rollover may not be posted yet. Verify chair names before relying on them. Also, no confirmed public email was found for co-chair Krista Hoffmann-Longtin."},
+  {id:'ufc-ba',    body:"⚠ Research note (Aug 2026): UFC's page for this committee showed a stale roster with terms listed as 2023-2025 as of this check. The chair names/emails seeded here may be outdated — verify with the UFC office before relying on them."},
+  {id:'ufc-fa',    body:"Research note (Aug 2026): no chair is publicly listed for this committee. Per UFC Bylaws, the committee selects its own chair internally — ask the UFC office or a fellow UFC representative who currently holds that role."},
+  {id:'ufc-ra',    body:"Research note (Aug 2026): no chair is publicly listed. The committee is described as co-chaired by a nominee from each of the IU Indianapolis and IU Bloomington research affairs committees, but current names weren't published — ask the UFC office."},
+  {id:'ufc-hd',    body:"Research note (Aug 2026): no chair is publicly listed. Per policy ACA-62 the chair is selected by the UFC Executive Committee — ask the UFC office for the current holder."},
+  {id:'ufc-oe',    body:"Research note (Aug 2026): Online Education runs as a subcommittee under UFC Academic Affairs rather than a standalone committee. No confirmed public email was found for co-chair Natalia Rybas (IU East)."},
+  {id:'ufc-sa',    body:"Research note (Aug 2026): no chair is publicly listed for this committee on the UFC site — ask the UFC office or a fellow UFC representative."},
+  {id:'ufc-tp',    body:"Research note (Aug 2026): no chair is publicly listed for this committee on the UFC site — ask the UFC office or a fellow UFC representative."}
+];
 
 const BFC_OFFICE = {
   email: "bfcoff@iu.edu",
@@ -524,15 +573,15 @@ const BFC_COMMITTEES = [
 ];
 
 const UFC_COMMITTEES = [
-  {id:'ufc-aa', abbr:'AA', name:'Academic Affairs', charge:'Oversees academic-related matters across IU campuses, with faculty representation from each institution.', url:'https://ufc.iu.edu/committees/index.html'},
-  {id:'ufc-ba', abbr:'BA', name:'Budgetary Advisory', charge:'Addresses fiscal and financial planning concerns; includes an ex-officio CFO member.', url:'https://ufc.iu.edu/committees/index.html'},
+  {id:'ufc-aa', abbr:'AA', name:'Academic Affairs', charge:'Oversees academic-related matters across IU campuses, with faculty representation from each institution.', url:'https://ufc.iu.edu/committees/aac.html'},
+  {id:'ufc-ba', abbr:'BA', name:'Budgetary Advisory', charge:'Addresses fiscal and financial planning concerns; includes an ex-officio CFO member.', url:'https://ufc.iu.edu/committees/bac.html'},
   {id:'ufc-ec', abbr:'EC', name:'Executive', charge:'Led by the University President as Presiding Officer, with co-chairs from major campuses.', url:'https://ufc.iu.edu/committees/index.html'},
-  {id:'ufc-fa', abbr:'FA', name:'Faculty Affairs', charge:'Handles personnel and professional development issues for faculty members university-wide.', url:'https://ufc.iu.edu/committees/index.html'},
-  {id:'ufc-ra', abbr:'RA', name:'Research Affairs', charge:'Manages research-related policies and initiatives; VP for Research serves ex-officio.', url:'https://ufc.iu.edu/committees/index.html'},
-  {id:'ufc-hd', abbr:'HD', name:'Honorary Degrees', charge:'Governed by university policy ACA-62; administers honorary degree considerations.', url:'https://ufc.iu.edu/committees/index.html'},
-  {id:'ufc-oe', abbr:'OE', name:'Online Education', charge:'Addresses distance learning and digital academic programs.', url:'https://ufc.iu.edu/committees/index.html'},
-  {id:'ufc-sa', abbr:'SA', name:'Student Affairs', charge:'Focuses on student-related policies and support services university-wide.', url:'https://ufc.iu.edu/committees/index.html'},
-  {id:'ufc-tp', abbr:'TP', name:'Technology Policy', charge:'Oversees technology standards and digital infrastructure matters university-wide.', url:'https://ufc.iu.edu/committees/index.html'}
+  {id:'ufc-fa', abbr:'FA', name:'Faculty Affairs', charge:'Handles personnel and professional development issues for faculty members university-wide.', url:'https://ufc.iu.edu/committees/fac.html'},
+  {id:'ufc-ra', abbr:'RA', name:'Research Affairs', charge:'Manages research-related policies and initiatives; VP for Research serves ex-officio.', url:'https://ufc.iu.edu/committees/researchaffairs.html'},
+  {id:'ufc-hd', abbr:'HD', name:'Honorary Degrees', charge:'Governed by university policy ACA-62; administers honorary degree considerations.', url:'https://policies.iu.edu/policies/aca-62-honorary-degrees/index.html'},
+  {id:'ufc-oe', abbr:'OE', name:'Online Education', charge:'Addresses distance learning and digital academic programs. Runs as a subcommittee under UFC Academic Affairs.', url:'https://ufc.iu.edu/committees/aac.html'},
+  {id:'ufc-sa', abbr:'SA', name:'Student Affairs', charge:'Focuses on student-related policies and support services university-wide.', url:'https://ufc.iu.edu/committees/sac.html'},
+  {id:'ufc-tp', abbr:'TP', name:'Technology Policy', charge:'Oversees technology standards and digital infrastructure matters university-wide.', url:'https://ufc.iu.edu/committees/tpc.html'}
 ];
 
 const ALL_COMMITTEES = [
@@ -565,8 +614,14 @@ function ensureSchema(){
   db.run(`CREATE TABLE IF NOT EXISTS committees (
     id TEXT PRIMARY KEY,
     chair_name TEXT DEFAULT '',
-    chair_email TEXT DEFAULT ''
+    chair_email TEXT DEFAULT '',
+    updated_at TEXT DEFAULT ''
   );`);
+  // migrate DBs saved before the updated_at column existed
+  const commCols = queryAll("PRAGMA table_info(committees)");
+  if(!commCols.some(c=>c.name==='updated_at')){
+    db.run(`ALTER TABLE committees ADD COLUMN updated_at TEXT DEFAULT ''`);
+  }
   db.run(`CREATE TABLE IF NOT EXISTS notes (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     committee_id TEXT NOT NULL,
@@ -575,6 +630,53 @@ function ensureSchema(){
     updated_at TEXT NOT NULL
   );`);
   db.run(`CREATE INDEX IF NOT EXISTS idx_notes_committee ON notes(committee_id);`);
+  db.run(`CREATE TABLE IF NOT EXISTS settings (
+    key TEXT PRIMARY KEY,
+    value TEXT
+  );`);
+  seedDefaults();
+}
+
+function seedDefaults(){
+  // INSERT OR IGNORE never overwrites a row that already exists, so this is safe to
+  // run on every load — it only fills in gaps, never clobbers your own edits.
+  const profileDefaults = [
+    ['profile_name', DEFAULT_PROFILE.name],
+    ['profile_role', DEFAULT_PROFILE.role],
+    ['profile_org', DEFAULT_PROFILE.org],
+    ['profile_term', DEFAULT_PROFILE.termLabel]
+  ];
+  profileDefaults.forEach(([k,v])=>{
+    db.run(`INSERT OR IGNORE INTO settings (key, value) VALUES (?,?)`, [k,v]);
+  });
+  SEED_CHAIRS.forEach(sc=>{
+    db.run(
+      `INSERT OR IGNORE INTO committees (id, chair_name, chair_email, updated_at) VALUES (?,?,?,?)`,
+      [sc.id, sc.name, sc.email, SEED_DATE]
+    );
+  });
+  SEED_NOTES.forEach(sn=>{
+    const already = queryOne(`SELECT id FROM notes WHERE committee_id=? AND body=?`, [sn.id, sn.body]);
+    if(!already){
+      db.run(`INSERT INTO notes (committee_id, body, created_at, updated_at) VALUES (?,?,?,?)`, [sn.id, sn.body, SEED_DATE, SEED_DATE]);
+    }
+  });
+}
+
+function getSetting(key, fallback){
+  const row = queryOne('SELECT value FROM settings WHERE key = ?', [key]);
+  return row && row.value != null ? row.value : fallback;
+}
+function setSetting(key, value){
+  db.run(`INSERT INTO settings (key, value) VALUES (?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value`, [key, value]);
+}
+function getProfile(){
+  return {
+    name: getSetting('profile_name', DEFAULT_PROFILE.name),
+    role: getSetting('profile_role', DEFAULT_PROFILE.role),
+    org: getSetting('profile_org', DEFAULT_PROFILE.org),
+    termLabel: getSetting('profile_term', DEFAULT_PROFILE.termLabel)
+  };
 }
 
 function queryAll(sql, params){
@@ -595,11 +697,30 @@ function getChair(id){
   return row ? {chairName: row.chair_name||'', chairEmail: row.chair_email||''} : {chairName:'', chairEmail:''};
 }
 function upsertChair(id, chairName, chairEmail){
+  const now = new Date().toISOString();
   db.run(
-    `INSERT INTO committees (id, chair_name, chair_email) VALUES (?,?,?)
-     ON CONFLICT(id) DO UPDATE SET chair_name=excluded.chair_name, chair_email=excluded.chair_email`,
-    [id, chairName, chairEmail]
+    `INSERT INTO committees (id, chair_name, chair_email, updated_at) VALUES (?,?,?,?)
+     ON CONFLICT(id) DO UPDATE SET chair_name=excluded.chair_name, chair_email=excluded.chair_email, updated_at=excluded.updated_at`,
+    [id, chairName, chairEmail, now]
   );
+}
+function lastUpdatedFor(committeeId){
+  const row = queryOne(
+    `SELECT MAX(ts) as ts FROM (
+       SELECT updated_at as ts FROM committees WHERE id = ?
+       UNION ALL
+       SELECT updated_at as ts FROM notes WHERE committee_id = ?
+     )`, [committeeId, committeeId]);
+  return row && row.ts ? row.ts : null;
+}
+function globalLastUpdated(){
+  const row = queryOne(
+    `SELECT MAX(ts) as ts FROM (
+       SELECT updated_at as ts FROM committees
+       UNION ALL
+       SELECT updated_at as ts FROM notes
+     )`);
+  return row && row.ts ? row.ts : null;
 }
 function getNotes(committeeId){
   return queryAll('SELECT id, body, created_at, updated_at FROM notes WHERE committee_id = ? ORDER BY created_at DESC', [committeeId]);
@@ -824,6 +945,20 @@ function formatDateTime(iso){
   if(isNaN(d.getTime())) return '';
   return d.toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'}) + ' at ' + d.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'});
 }
+function formatDateShort(iso){
+  if(!iso) return '';
+  const d = new Date(iso);
+  if(isNaN(d.getTime())) return '';
+  return d.toLocaleDateString(undefined,{month:'short',day:'numeric'});
+}
+function cleanEmailList(raw){
+  // mailto: wants a comma-separated list with no whitespace/newlines between addresses
+  return (raw||'').split(',').map(s=>s.trim()).filter(Boolean).join(',');
+}
+function updateBrandSub(){
+  const p = getProfile();
+  document.getElementById('brand-sub').textContent = `${p.name} · ${p.role}, ${p.org}`;
+}
 let toastTimer=null;
 function showToast(msg){
   const t = document.getElementById('toast');
@@ -906,19 +1041,24 @@ function renderHome(){
   const tiles = ALL_COMMITTEES.map(c=>{
     const chair = getChair(c.id);
     const n = noteCount(c.id);
+    const upd = formatDateShort(lastUpdatedFor(c.id));
     return `<div class="tile" data-id="${c.id}">
       <div class="tname">${escapeHtml(c.abbr)} <span style="font-weight:400;color:var(--ink-soft);">— ${escapeHtml(c.name)}</span></div>
       <div class="tstat">
         <span class="${chair.chairEmail?'on':''}">${chair.chairEmail?'✓ chair set':'no chair email'}</span>
         <span class="${n>0?'on':''}">${n} note${n===1?'':'s'}</span>
+        ${upd?`<span>upd ${upd}</span>`:''}
       </div>
     </div>`;
   }).join('');
 
+  const profile = getProfile();
+  const globalUpd = globalLastUpdated();
+
   return `
     <div class="page" style="max-width:960px;">
-      <div class="page-head"><h1>Welcome, ${escapeHtml(TERM.name)}</h1></div>
-      <p class="charge">${escapeHtml(TERM.role)}, ${escapeHtml(TERM.org)} &middot; Term ${escapeHtml(TERM.termLabel)}</p>
+      <div class="page-head"><h1>Welcome, ${escapeHtml(profile.name)}</h1></div>
+      <p class="charge">${escapeHtml(profile.role)}, ${escapeHtml(profile.org)} &middot; Term ${escapeHtml(profile.termLabel)}${globalUpd?` &middot; Data last updated ${formatDateTime(globalUpd)}`:''}</p>
 
       ${fileNote}
 
@@ -927,6 +1067,31 @@ function renderHome(){
         <div class="stat"><div class="num">${withChair}</div><div class="lbl">Chair contacts on file</div></div>
         <div class="stat"><div class="num">${withNotes}</div><div class="lbl">Committees with notes</div></div>
         <div class="stat"><div class="num">${totalNoteCount()}</div><div class="lbl">Total notes logged</div></div>
+      </div>
+
+      <div class="card">
+        <h2>Your Profile</h2>
+        <div class="row">
+          <div>
+            <label>Name</label>
+            <input type="text" id="profName" value="${escapeHtml(profile.name)}">
+          </div>
+          <div>
+            <label>Role</label>
+            <input type="text" id="profRole" value="${escapeHtml(profile.role)}" placeholder="e.g., President-Elect, President, Past President">
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label>Organization</label>
+            <input type="text" id="profOrg" value="${escapeHtml(profile.org)}">
+          </div>
+          <div>
+            <label>Term</label>
+            <input type="text" id="profTerm" value="${escapeHtml(profile.termLabel)}" placeholder="e.g., 2026 – 2029">
+          </div>
+        </div>
+        <div class="note-small">This appears in the sidebar and in the signature of every email this app drafts. Update it as your role changes year to year (President-Elect → President → Past President), or if someone else ever takes this app over.</div>
       </div>
 
       <div class="card">
@@ -953,10 +1118,25 @@ function attachHomeListeners(){
   document.querySelectorAll('.tile').forEach(t=>{
     t.addEventListener('click', ()=> selectTab(t.dataset.id));
   });
+  const profName = document.getElementById('profName');
+  const profRole = document.getElementById('profRole');
+  const profOrg = document.getElementById('profOrg');
+  const profTerm = document.getElementById('profTerm');
+  [profName, profRole, profOrg, profTerm].forEach(el=>{
+    el.addEventListener('input', ()=>{
+      setSetting('profile_name', profName.value);
+      setSetting('profile_role', profRole.value);
+      setSetting('profile_org', profOrg.value);
+      setSetting('profile_term', profTerm.value);
+      updateBrandSub();
+      debouncedSave();
+    });
+  });
 }
 
 function renderCommittee(c){
   const chair = getChair(c.id);
+  const upd = lastUpdatedFor(c.id);
   return `
     <div class="page">
       <div class="page-head">
@@ -965,6 +1145,7 @@ function renderCommittee(c){
         <a class="ext-link" href="${c.url}" target="_blank" rel="noopener">Committee page ↗</a>
       </div>
       <p class="charge">${escapeHtml(c.charge)}</p>
+      ${upd ? `<div class="note-small" style="margin:-14px 0 20px;">Last updated ${formatDateTime(upd)}</div>` : ''}
 
       <div class="card">
         <h2>Chair Contact</h2>
@@ -981,7 +1162,7 @@ function renderCommittee(c){
         <div class="actions">
           <button class="btn-primary btn" id="emailChairBtn">✉ Email Chair</button>
         </div>
-        ${c.level==='UFC' ? '<div class="note-small">UFC committee rosters are consolidated on one page — use "Committee page ↗" above and search for this committee\'s section.</div>' : ''}
+        <div class="note-small">Chairs rotate most years — double-check against "Committee page ↗" above before relying on this for something time-sensitive.</div>
       </div>
 
       ${renderNotesSection(c.id, `Notes, action items, meeting summaries for ${escapeHtml(c.abbr)}...`)}
@@ -1000,19 +1181,22 @@ function attachCommitteeListeners(c){
     });
   });
   document.getElementById('emailChairBtn').addEventListener('click', ()=>{
-    const email = emailEl.value.trim();
+    const email = cleanEmailList(emailEl.value);
     if(!email){ showToast("Add the chair's email address first."); return; }
+    const profile = getProfile();
     const subject = encodeURIComponent(`BFC ${c.abbr} — `);
-    const body = encodeURIComponent(`Dear ${nameEl.value.trim() || 'Chair'},\n\n\n\nBest,\n${TERM.name}\n${TERM.role}, ${TERM.org}`);
+    const body = encodeURIComponent(`Dear ${nameEl.value.trim() || 'Chair'},\n\n\n\nBest,\n${profile.name}\n${profile.role}, ${profile.org}`);
     window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
   });
 }
 
 function renderBfcWide(){
+  const upd = lastUpdatedFor(BFCWIDE_ID);
   return `
     <div class="page">
       <div class="page-head"><h1>BFC-Wide Channel</h1></div>
       <p class="charge">Reach the full BFC membership. IU does not publish a direct all-member listserv, so messages are routed through the BFC office for distribution to the council.</p>
+      ${upd ? `<div class="note-small" style="margin:-14px 0 20px;">Last updated ${formatDateTime(upd)}</div>` : ''}
 
       <div class="card">
         <h2>Contact All BFC Members</h2>
@@ -1034,9 +1218,10 @@ function renderBfcWide(){
 
 function attachBfcWideExtras(){
   document.getElementById('emailAllBtn').addEventListener('click', ()=>{
+    const profile = getProfile();
     const subject = encodeURIComponent('Message for BFC Council distribution');
-    const body = encodeURIComponent(`Hello ${BFC_OFFICE.director.split(',')[0]},\n\nCould you please distribute the following message to the BFC Council?\n\n---\n[Your message here]\n---\n\nThank you,\n${TERM.name}\n${TERM.role}, ${TERM.org}`);
-    window.location.href = `mailto:${BFC_OFFICE.email}?subject=${subject}&body=${body}`;
+    const body = encodeURIComponent(`Hello ${BFC_OFFICE.director.split(',')[0]},\n\nCould you please distribute the following message to the BFC Council?\n\n---\n[Your message here]\n---\n\nThank you,\n${profile.name}\n${profile.role}, ${profile.org}`);
+    window.location.href = `mailto:${cleanEmailList(BFC_OFFICE.email)}?subject=${subject}&body=${body}`;
   });
 }
 
@@ -1202,11 +1387,21 @@ async function init(){
   }
   ensureSchema();
 
+  updateBrandSub();
   renderSidebar();
   selectTab('home');
   updateStatus();
 }
 init();
+
+// Register the service worker so a real "Install" prompt (and offline support) is available
+// when this app is served over https (e.g. GitHub Pages). Silently skipped on file:// or
+// other non-secure origins, where service workers aren't available/relevant.
+if('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')){
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('service-worker.js').catch(()=>{ /* non-fatal */ });
+  });
+}
 
 })();
 </script>
