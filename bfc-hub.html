@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BFC Administration Hub</title>
+<style>
+  :root{
+    --crimson:#990000;
+    --crimson-dark:#7a0000;
+    --crimson-light:#f6e6e6;
+    --cream:#f7f4ee;
+    --ink:#1f1c1c;
+    --ink-soft:#5a5555;
+    --line:#e4ddd6;
+    --card:#ffffff;
+    --ufc-blue:#2b4a6f;
+    --ufc-blue-light:#e8edf3;
+    --ok:#2e7d46;
+    --warn:#b5730a;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+    background:var(--cream);
+    color:var(--ink);
+    display:flex;
+    height:100vh;
+    overflow:hidden;
+  }
+  /* Sidebar */
+  #sidebar{
+    width:290px;
+    min-width:290px;
+    background:#fff;
+    border-right:1px solid var(--line);
+    display:flex;
+    flex-direction:column;
+    height:100%;
+  }
+  #brand{
+    padding:18px 16px 12px;
+    border-bottom:1px solid var(--line);
+  }
+  #brand .title{
+    font-size:17px;
+    font-weight:700;
+    color:var(--crimson);
+    letter-spacing:.2px;
+  }
+  #brand .subtitle{
+    font-size:12px;
+    color:var(--ink-soft);
+    margin-top:4px;
+    line-height:1.4;
+  }
+  #search-wrap{padding:10px 14px;border-bottom:1px solid var(--line);}
+  #search{
+    width:100%;
+    padding:8px 10px;
+    border:1px solid var(--line);
+    border-radius:7px;
+    font-size:13px;
+    outline:none;
+  }
+  #search:focus{border-color:var(--crimson);}
+  #nav{flex:1;overflow-y:auto;padding:8px 0 8px;}
+  .nav-group-label{
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    color:var(--ink-soft);
+    padding:14px 16px 6px;
+    font-weight:700;
+  }
+  .nav-item{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:8px 16px;
+    font-size:13.5px;
+    cursor:pointer;
+    color:var(--ink);
+    border-left:3px solid transparent;
+  }
+  .nav-item:hover{background:var(--crimson-light);}
+  .nav-item.active{
+    background:var(--crimson-light);
+    border-left-color:var(--crimson);
+    font-weight:600;
+    color:var(--crimson-dark);
+  }
+  .nav-item .dot{
+    width:6px;height:6px;border-radius:50%;
+    background:var(--line);
+    flex-shrink:0;
+  }
+  .nav-item .dot.filled{background:var(--ok);}
+  .nav-item small{color:var(--ink-soft);font-weight:400;margin-left:auto;}
+  #sidebar-foot{
+    border-top:1px solid var(--line);
+    padding:10px 14px;
+    font-size:11px;
+    color:var(--ink-soft);
+  }
+  /* Main */
+  #main-col{flex:1;display:flex;flex-direction:column;height:100%;overflow:hidden;}
+  #topbar{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:10px 24px;
+    border-bottom:1px solid var(--line);
+    background:#fff;
+    flex-wrap:wrap;
+  }
+  #status{
+    font-size:12px;
+    color:var(--ink-soft);
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  #status .sdot{width:8px;height:8px;border-radius:50%;background:var(--ink-soft);}
+  #status.ok .sdot{background:var(--ok);}
+  #status.warn .sdot{background:var(--warn);}
+  .spacer{flex:1;}
+  button{
+    font-family:inherit;
+    cursor:pointer;
+  }
+  .btn{
+    padding:7px 12px;
+    border-radius:7px;
+    border:1px solid var(--line);
+    background:#fff;
+    font-size:12.5px;
+    font-weight:600;
+    color:var(--ink);
+  }
+  .btn:hover{background:var(--cream);}
+  .btn-primary{
+    background:var(--crimson);
+    border-color:var(--crimson);
+    color:#fff;
+  }
+  .btn-primary:hover{background:var(--crimson-dark);}
+  #main{flex:1;overflow-y:auto;padding:28px 34px 60px;}
+  .page{max-width:820px;}
+  .page-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:6px;}
+  .page-head h1{font-size:22px;margin:0;}
+  .badge{
+    font-size:11px;
+    font-weight:700;
+    padding:3px 9px;
+    border-radius:20px;
+    letter-spacing:.03em;
+  }
+  .badge-bfc{background:var(--crimson-light);color:var(--crimson-dark);}
+  .badge-ufc{background:var(--ufc-blue-light);color:var(--ufc-blue);}
+  .ext-link{font-size:12.5px;color:var(--crimson);text-decoration:none;margin-left:auto;}
+  .ext-link:hover{text-decoration:underline;}
+  .charge{color:var(--ink-soft);font-size:14px;line-height:1.55;margin:6px 0 22px;}
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:18px 20px;
+    margin-bottom:18px;
+  }
+  .card h2{font-size:14px;margin:0 0 12px;color:var(--ink);}
+  .card label{display:block;font-size:12px;font-weight:600;color:var(--ink-soft);margin:10px 0 4px;}
+  .card label:first-of-type{margin-top:0;}
+  .card input[type=text],.card input[type=email],.card textarea{
+    width:100%;
+    padding:8px 10px;
+    border:1px solid var(--line);
+    border-radius:7px;
+    font-size:13.5px;
+    font-family:inherit;
+    outline:none;
+  }
+  .card input:focus,.card textarea:focus{border-color:var(--crimson);}
+  .card textarea{resize:vertical;line-height:1.5;}
+  .row{display:flex;gap:12px;flex-wrap:wrap;}
+  .row > div{flex:1;min-width:200px;}
+  .actions{margin-top:14px;display:flex;gap:10px;}
+  .note-small{font-size:11.5px;color:var(--ink-soft);margin-top:8px;line-height:1.5;}
+  .banner{
+    background:var(--crimson-light);
+    border:1px solid #e4c4c4;
+    color:var(--crimson-dark);
+    border-radius:10px;
+    padding:12px 16px;
+    font-size:13px;
+    margin-bottom:20px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    flex-wrap:wrap;
+  }
+  .banner.info{background:#eef2f7;border-color:#cdd9e6;color:var(--ufc-blue);}
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(210px,1fr));
+    gap:12px;
+    margin-top:8px;
+  }
+  .tile{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:13px 14px;
+    cursor:pointer;
+  }
+  .tile:hover{border-color:var(--crimson);}
+  .tile .tname{font-size:13px;font-weight:600;margin-bottom:4px;}
+  .tile .tstat{font-size:11px;color:var(--ink-soft);display:flex;gap:8px;}
+  .tile .tstat span.on{color:var(--ok);}
+  .stat-row{display:flex;gap:14px;flex-wrap:wrap;margin:16px 0 6px;}
+  .stat{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:14px 18px;
+    min-width:140px;
+  }
+  .stat .num{font-size:24px;font-weight:700;color:var(--crimson);}
+  .stat .lbl{font-size:12px;color:var(--ink-soft);margin-top:2px;}
+  #toast{
+    position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+    background:var(--ink);color:#fff;padding:10px 18px;border-radius:8px;
+    font-size:13px;opacity:0;pointer-events:none;transition:opacity .25s ease, transform .25s ease;
+    z-index:50;
+  }
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(-4px);}
+  #import-input{display:none;}
+  a{color:var(--crimson);}
+  .kv{font-size:13px;line-height:1.9;}
+  .kv b{color:var(--ink-soft);font-weight:600;display:inline-block;min-width:64px;}
+</style>
+</head>
+<body>
+
+<div id="sidebar">
+  <div id="brand">
+    <div class="title">BFC Administration Hub</div>
+    <div class="subtitle" id="brand-sub">Amr Sabry &middot; President-Elect, Bloomington Faculty Council</div>
+  </div>
+  <div id="search-wrap"><input id="search" type="text" placeholder="Search committees..."></div>
+  <div id="nav"></div>
+  <div id="sidebar-foot">Indiana University Bloomington</div>
+</div>
+
+<div id="main-col">
+  <div id="topbar">
+    <div id="status"><span class="sdot"></span><span id="status-text">Checking storage…</span></div>
+    <div class="spacer"></div>
+    <button class="btn" id="connectBtn">🔗 Connect Data File</button>
+    <button class="btn" id="exportBtn">⬇ Export</button>
+    <button class="btn" id="importBtn">⬆ Import</button>
+    <input type="file" id="import-input" accept="application/json">
+  </div>
+  <div id="main"></div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ---------------- Data ---------------- */
+
+const TERM = {
+  name: "Amr Sabry",
+  role: "President-Elect",
+  org: "Bloomington Faculty Council",
+  termLabel: "2026 – 2029"
+};
+
+const BFC_OFFICE = {
+  email: "bfcoff@iu.edu",
+  phone: "812-855-6096",
+  address: "Bryan Hall 115, 107 S. Indiana Avenue, Bloomington, IN 47405",
+  director: "Virginia Hojas Carbonell, Director",
+  siteUrl: "https://bfc.indiana.edu/contact/index.html"
+};
+
+const BFC_COMMITTEES = [
+  {id:'bfc-ben',   abbr:'BEN',    name:'Benefits Committee', charge:'Consults with the Director of Benefits at IUB to understand and inform administrative decisions and represents faculty benefits needs.', url:'https://bfc.indiana.edu/committees/standing/ben/index.html'},
+  {id:'bfc-bac',   abbr:'BAC',    name:'Budgetary Affairs Committee', charge:'Tracks campus budget development through consultations with leadership and attendance at unit budget meetings.', url:'https://bfc.indiana.edu/committees/standing/bac.html'},
+  {id:'bfc-carc',  abbr:'CARC',   name:'Constitution and Rules Committee', charge:'Oversees the BFC Constitution and Bylaws, advises on procedures, and monitors policy changes.', url:'https://bfc.indiana.edu/committees/standing/carc/index.html'},
+  {id:'bfc-crem',  abbr:'CREM',   name:'CREM Committee', charge:'Advocates for those impacted by program creation, reorganization, elimination, or merger.', url:'https://bfc.indiana.edu/committees/standing/crem/index.html'},
+  {id:'bfc-deic',  abbr:'DEIC',   name:'Diversity, Equity and Inclusion Committee', charge:'Advocates for diverse faculty, staff, and students; provides resource information.', url:'https://bfc.indiana.edu/committees/standing/deic/index.html'},
+  {id:'bfc-epc',   abbr:'EPC',    name:'Educational Policies Committee', charge:'Develops campus policies on teaching, curriculum, and student information.', url:'https://bfc.indiana.edu/committees/standing/epc/index.html'},
+  {id:'bfc-ec',    abbr:'EC',     name:'Executive Committee', charge:'Sets BFC meeting agendas and delegates work to other committees.', url:'https://bfc.indiana.edu/committees/standing/ec.html'},
+  {id:'bfc-fac',   abbr:'FAC',    name:'Faculty Affairs Committee', charge:'Develops policies regarding appointments, grievances, misconduct, and working conditions.', url:'https://bfc.indiana.edu/committees/standing/fac/index.html'},
+  {id:'bfc-iac',   abbr:'IAC',    name:'International Affairs Committee', charge:'Develops policies related to international programs.', url:'https://bfc.indiana.edu/committees/standing/iac/index.html'},
+  {id:'bfc-lib',   abbr:'LIB',    name:'Libraries Committee', charge:'Advises the Dean of Libraries on priorities and monitors copyright and access issues.', url:'https://bfc.indiana.edu/committees/standing/lib/index.html'},
+  {id:'bfc-lrpc',  abbr:'LRPC',   name:'Long-Range Planning Committee', charge:'Provides space for strategic thinking about matters impacting teaching, research, and faculty status.', url:'https://bfc.indiana.edu/committees/standing/lrpc/index.html'},
+  {id:'bfc-nomcom',abbr:'NomComm',name:'Nomination Committee', charge:'Conducts council elections and appoints members to BFC committees.', url:'https://bfc.indiana.edu/committees/standing/nomcom.html'},
+  {id:'bfc-rac',   abbr:'RAC',    name:'Research Affairs Committee', charge:'Develops policies related to research and creative activity.', url:'https://bfc.indiana.edu/committees/standing/rac/index.html'},
+  {id:'bfc-sac',   abbr:'SAC',    name:'Student Affairs Committee', charge:'Focuses on learning, working, and living conditions for students.', url:'https://bfc.indiana.edu/committees/standing/sac/index.html'},
+  {id:'bfc-saaac', abbr:'SAAAC',  name:'Student Academic Appointee Affairs Committee', charge:'Addresses laws and policies impacting Student Academic Appointees (SAAs).', url:'https://bfc.indiana.edu/committees/standing/saaac/index.html'},
+  {id:'bfc-tpc',   abbr:'TPC',    name:'Technology Policy Committee', charge:'Develops policies on technologies used for research and teaching.', url:'https://bfc.indiana.edu/committees/standing/tpc/index.html'}
+];
+
+const UFC_COMMITTEES = [
+  {id:'ufc-aa', abbr:'AA', name:'Academic Affairs', charge:'Oversees academic-related matters across IU campuses, with faculty representation from each institution.', url:'https://ufc.iu.edu/committees/index.html'},
+  {id:'ufc-ba', abbr:'BA', name:'Budgetary Advisory', charge:'Addresses fiscal and financial planning concerns; includes an ex-officio CFO member.', url:'https://ufc.iu.edu/committees/index.html'},
+  {id:'ufc-ec', abbr:'EC', name:'Executive', charge:'Led by the University President as Presiding Officer, with co-chairs from major campuses.', url:'https://ufc.iu.edu/committees/index.html'},
+  {id:'ufc-fa', abbr:'FA', name:'Faculty Affairs', charge:'Handles personnel and professional development issues for faculty members university-wide.', url:'https://ufc.iu.edu/committees/index.html'},
+  {id:'ufc-ra', abbr:'RA', name:'Research Affairs', charge:'Manages research-related policies and initiatives; VP for Research serves ex-officio.', url:'https://ufc.iu.edu/committees/index.html'},
+  {id:'ufc-hd', abbr:'HD', name:'Honorary Degrees', charge:'Governed by university policy ACA-62; administers honorary degree considerations.', url:'https://ufc.iu.edu/committees/index.html'},
+  {id:'ufc-oe', abbr:'OE', name:'Online Education', charge:'Addresses distance learning and digital academic programs.', url:'https://ufc.iu.edu/committees/index.html'},
+  {id:'ufc-sa', abbr:'SA', name:'Student Affairs', charge:'Focuses on student-related policies and support services university-wide.', url:'https://ufc.iu.edu/committees/index.html'},
+  {id:'ufc-tp', abbr:'TP', name:'Technology Policy', charge:'Oversees technology standards and digital infrastructure matters university-wide.', url:'https://ufc.iu.edu/committees/index.html'}
+];
+
+const ALL_COMMITTEES = [
+  ...BFC_COMMITTEES.map(c=>({...c, level:'BFC'})),
+  ...UFC_COMMITTEES.map(c=>({...c, level:'UFC'}))
+];
+const byId = Object.fromEntries(ALL_COMMITTEES.map(c=>[c.id,c]));
+
+/* ---------------- State ---------------- */
+
+let state = { committees:{}, bfcWide:{notes:''} };
+let currentTab = 'home';
+let fileHandle = null;
+let fsApiSupported = ('showSaveFilePicker' in window);
+let searchTerm = '';
+
+function emptyRecord(){ return {chairName:'',chairEmail:'',notes:''}; }
+function getRec(id){ return state.committees[id] || emptyRecord(); }
+function setRec(id, patch){
+  state.committees[id] = Object.assign(emptyRecord(), state.committees[id]||{}, patch);
+}
+
+/* ---------------- Persistence ---------------- */
+
+function loadLocalStorage(){
+  try{
+    const raw = localStorage.getItem('bfcHubData');
+    if(raw){
+      const parsed = JSON.parse(raw);
+      state = Object.assign({committees:{}, bfcWide:{notes:''}}, parsed);
+    }
+  }catch(e){ /* storage unavailable (e.g. Safari on file://) - ignore, fall back to file/import */ }
+}
+function saveLocalStorage(){
+  try{ localStorage.setItem('bfcHubData', JSON.stringify(state)); }catch(e){ /* ignore */ }
+}
+
+function idbOpen(){
+  return new Promise((resolve,reject)=>{
+    const req = indexedDB.open('bfcHubDB', 1);
+    req.onupgradeneeded = ()=> req.result.createObjectStore('handles');
+    req.onsuccess = ()=> resolve(req.result);
+    req.onerror = ()=> reject(req.error);
+  });
+}
+async function idbGet(key){
+  try{
+    const db = await idbOpen();
+    return await new Promise((resolve,reject)=>{
+      const tx = db.transaction('handles','readonly');
+      const r = tx.objectStore('handles').get(key);
+      r.onsuccess = ()=>resolve(r.result);
+      r.onerror = ()=>reject(r.error);
+    });
+  }catch(e){ return null; }
+}
+async function idbSet(key,val){
+  try{
+    const db = await idbOpen();
+    return await new Promise((resolve,reject)=>{
+      const tx = db.transaction('handles','readwrite');
+      tx.objectStore('handles').put(val,key);
+      tx.oncomplete = ()=>resolve();
+      tx.onerror = ()=>reject(tx.error);
+    });
+  }catch(e){ /* ignore */ }
+}
+
+let fileStatus = 'none'; // none | linked | saving | saved | denied | error
+let lastSavedAt = null;
+
+async function tryReconnectFile(){
+  if(!fsApiSupported) return;
+  const handle = await idbGet('dataFileHandle');
+  if(!handle) return;
+  fileHandle = handle;
+  try{
+    const perm = await handle.queryPermission({mode:'readwrite'});
+    if(perm === 'granted'){
+      await readFromFile();
+      fileStatus = 'linked';
+    } else {
+      fileStatus = 'denied'; // needs user click to reconnect
+    }
+  }catch(e){ fileStatus = 'error'; }
+}
+
+async function readFromFile(){
+  try{
+    const file = await fileHandle.getFile();
+    const text = await file.text();
+    if(text && text.trim()){
+      const parsed = JSON.parse(text);
+      state = Object.assign({committees:{}, bfcWide:{notes:''}}, parsed);
+    }
+  }catch(e){ /* ignore */ }
+}
+
+async function writeToFile(){
+  if(!fileHandle) return;
+  try{
+    let perm = await fileHandle.queryPermission({mode:'readwrite'});
+    if(perm !== 'granted'){
+      perm = await fileHandle.requestPermission({mode:'readwrite'});
+    }
+    if(perm !== 'granted'){ fileStatus='denied'; updateStatus(); return; }
+    const writable = await fileHandle.createWritable();
+    await writable.write(JSON.stringify(state, null, 2));
+    await writable.close();
+    fileStatus = 'linked';
+    lastSavedAt = new Date();
+  }catch(e){ fileStatus = 'error'; }
+  updateStatus();
+}
+
+async function connectDataFile(){
+  if(!fsApiSupported){
+    showToast('Your browser doesn\'t support direct file linking. Use Export/Import instead, or open this app in Chrome or Edge.');
+    return;
+  }
+  try{
+    let handle;
+    try{
+      handle = await window.showOpenFilePicker({
+        types:[{description:'BFC Hub data', accept:{'application/json':['.json']}}],
+        excludeAcceptAllOption:false
+      });
+      handle = handle[0];
+      fileHandle = handle;
+      await idbSet('dataFileHandle', handle);
+      await readFromFile();
+      saveLocalStorage();
+      renderSidebar(); renderMain();
+      fileStatus = 'linked';
+      showToast('Linked to your existing data file.');
+    }catch(openErr){
+      // user may want to create a new one instead - fall through only if they cancelled open explicitly via separate button
+      throw openErr;
+    }
+  }catch(e){
+    // fallback path: try creating a new file
+    try{
+      const handle = await window.showSaveFilePicker({
+        suggestedName:'bfc-hub-data.json',
+        types:[{description:'BFC Hub data', accept:{'application/json':['.json']}}]
+      });
+      fileHandle = handle;
+      await idbSet('dataFileHandle', handle);
+      await writeToFile();
+      showToast('Data file created and linked.');
+    }catch(e2){ /* user cancelled everything */ }
+  }
+  updateStatus();
+}
+
+function persistAll(){
+  saveLocalStorage();
+  if(fileHandle){ writeToFile(); }
+  updateStatus();
+}
+
+let saveTimer = null;
+function debouncedSave(){
+  fileStatus = fileHandle ? 'saving' : fileStatus;
+  updateStatus();
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(persistAll, 500);
+}
+
+function updateStatus(){
+  const el = document.getElementById('status');
+  const txt = document.getElementById('status-text');
+  el.classList.remove('ok','warn');
+  if(fileHandle && fileStatus==='linked'){
+    el.classList.add('ok');
+    txt.textContent = 'Saved to linked file' + (lastSavedAt ? ' · ' + lastSavedAt.toLocaleTimeString() : '');
+  } else if(fileHandle && fileStatus==='saving'){
+    txt.textContent = 'Saving…';
+  } else if(fileHandle && fileStatus==='denied'){
+    el.classList.add('warn');
+    txt.textContent = 'Data file linked but needs permission — click Connect Data File to reconnect';
+  } else if(!fsApiSupported){
+    el.classList.add('warn');
+    txt.textContent = 'Autosaving in this browser only — use Export regularly to back up (Safari doesn\'t support direct file saving)';
+  } else {
+    el.classList.add('warn');
+    txt.textContent = 'Not linked to a file yet — click "Connect Data File" to save permanently on your Mac';
+  }
+}
+
+/* ---------------- Export / Import ---------------- */
+
+function exportData(){
+  const blob = new Blob([JSON.stringify(state,null,2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `bfc-hub-data-${new Date().toISOString().slice(0,10)}.json`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  showToast('Exported.');
+}
+function importDataFile(file){
+  const reader = new FileReader();
+  reader.onload = e=>{
+    try{
+      const parsed = JSON.parse(e.target.result);
+      state = Object.assign({committees:{}, bfcWide:{notes:''}}, parsed);
+      persistAll();
+      renderSidebar(); renderMain();
+      showToast('Data imported.');
+    }catch(err){ showToast('Could not read that file — is it a BFC Hub export?'); }
+  };
+  reader.readAsText(file);
+}
+
+/* ---------------- UI helpers ---------------- */
+
+function escapeHtml(str){
+  return (str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+let toastTimer=null;
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove('show'), 3200);
+}
+
+/* ---------------- Rendering: Sidebar ---------------- */
+
+function committeeHasData(id){
+  const r = state.committees[id];
+  return !!(r && (r.chairEmail || r.notes || r.chairName));
+}
+
+function renderSidebar(){
+  const nav = document.getElementById('nav');
+  const term = searchTerm.trim().toLowerCase();
+  const filterFn = c => !term || c.name.toLowerCase().includes(term) || c.abbr.toLowerCase().includes(term);
+
+  let html = '';
+  html += navItem('home', '🏠 Home', null);
+  html += navItem('bfcwide', '📣 BFC-Wide Channel', committeeHasData('bfcwide-channel'));
+
+  const bfcFiltered = BFC_COMMITTEES.filter(filterFn);
+  if(bfcFiltered.length){
+    html += `<div class="nav-group-label">BFC Standing Committees</div>`;
+    html += bfcFiltered.map(c=>navItem(c.id, c.name, committeeHasData(c.id), c.abbr)).join('');
+  }
+  const ufcFiltered = UFC_COMMITTEES.filter(filterFn);
+  if(ufcFiltered.length){
+    html += `<div class="nav-group-label">UFC Standing Committees</div>`;
+    html += ufcFiltered.map(c=>navItem(c.id, c.name, committeeHasData(c.id), c.abbr)).join('');
+  }
+  if(term && !bfcFiltered.length && !ufcFiltered.length){
+    html += `<div style="padding:14px 16px;font-size:12.5px;color:var(--ink-soft);">No committees match "${escapeHtml(searchTerm)}"</div>`;
+  }
+  nav.innerHTML = html;
+
+  nav.querySelectorAll('.nav-item').forEach(el=>{
+    el.addEventListener('click', ()=> selectTab(el.dataset.id));
+  });
+}
+
+function navItem(id, label, filled, abbr){
+  const active = id===currentTab ? 'active' : '';
+  const dotHtml = filled===null ? '' : `<span class="dot ${filled?'filled':''}"></span>`;
+  return `<div class="nav-item ${active}" data-id="${id}">${dotHtml}<span>${escapeHtml(label)}</span>${abbr?`<small>${abbr}</small>`:''}</div>`;
+}
+
+/* ---------------- Rendering: Main ---------------- */
+
+function selectTab(id){
+  currentTab = id;
+  renderSidebar();
+  renderMain();
+}
+
+function renderMain(){
+  const main = document.getElementById('main');
+  if(currentTab==='home'){ main.innerHTML = renderHome(); attachHomeListeners(); return; }
+  if(currentTab==='bfcwide'){ main.innerHTML = renderBfcWide(); attachBfcWideListeners(); return; }
+  const c = byId[currentTab];
+  if(!c){ main.innerHTML = '<p>Not found.</p>'; return; }
+  main.innerHTML = renderCommittee(c);
+  attachCommitteeListeners(c);
+}
+
+function renderHome(){
+  const total = ALL_COMMITTEES.length;
+  const withChair = ALL_COMMITTEES.filter(c=>getRec(c.id).chairEmail).length;
+  const withNotes = ALL_COMMITTEES.filter(c=>getRec(c.id).notes).length;
+
+  const fileNote = fsApiSupported
+    ? `<div class="banner info">💾 For permanent local storage, click <b>&nbsp;Connect Data File&nbsp;</b> above. A file picker opens — choose an existing <code>bfc-hub-data.json</code> to resume it, or cancel that dialog to create a new one (e.g. in Documents). This app then autosaves directly to that file on every change. Reopen it the same way each session — your browser may ask you to re-grant permission the first time.</div>`
+    : `<div class="banner">⚠ This browser doesn't support direct-to-disk saving. Open this file in <b>Chrome</b> or <b>Edge</b> for automatic local saving, or use <b>Export</b> / <b>Import</b> each session to carry your data forward.</div>`;
+
+  const tiles = ALL_COMMITTEES.map(c=>{
+    const r = getRec(c.id);
+    return `<div class="tile" data-id="${c.id}">
+      <div class="tname">${escapeHtml(c.abbr)} <span style="font-weight:400;color:var(--ink-soft);">— ${escapeHtml(c.name)}</span></div>
+      <div class="tstat">
+        <span class="${r.chairEmail?'on':''}">${r.chairEmail?'✓ chair set':'no chair email'}</span>
+        <span class="${r.notes?'on':''}">${r.notes?'✓ notes':'no notes'}</span>
+      </div>
+    </div>`;
+  }).join('');
+
+  return `
+    <div class="page" style="max-width:960px;">
+      <div class="page-head"><h1>Welcome, ${escapeHtml(TERM.name)}</h1></div>
+      <p class="charge">${escapeHtml(TERM.role)}, ${escapeHtml(TERM.org)} &middot; Term ${escapeHtml(TERM.termLabel)}</p>
+
+      ${fileNote}
+
+      <div class="stat-row">
+        <div class="stat"><div class="num">${total}</div><div class="lbl">Committees tracked</div></div>
+        <div class="stat"><div class="num">${withChair}</div><div class="lbl">Chair contacts on file</div></div>
+        <div class="stat"><div class="num">${withNotes}</div><div class="lbl">Committees with notes</div></div>
+      </div>
+
+      <div class="card">
+        <h2>Bloomington Faculty Council Office</h2>
+        <div class="kv">
+          <div><b>Director</b> ${escapeHtml(BFC_OFFICE.director)}</div>
+          <div><b>Email</b> <a href="mailto:${BFC_OFFICE.email}">${BFC_OFFICE.email}</a></div>
+          <div><b>Phone</b> ${BFC_OFFICE.phone}</div>
+          <div><b>Address</b> ${escapeHtml(BFC_OFFICE.address)}</div>
+        </div>
+        <div class="actions">
+          <button class="btn" onclick="window.open('https://bfc.indiana.edu/committees/index.html','_blank')">BFC Committees Site ↗</button>
+          <button class="btn" onclick="window.open('https://ufc.iu.edu/committees/index.html','_blank')">UFC Committees Site ↗</button>
+        </div>
+      </div>
+
+      <h2 style="font-size:14px;margin:22px 0 4px;">All Committees</h2>
+      <div class="grid">${tiles}</div>
+    </div>
+  `;
+}
+
+function attachHomeListeners(){
+  document.querySelectorAll('.tile').forEach(t=>{
+    t.addEventListener('click', ()=> selectTab(t.dataset.id));
+  });
+}
+
+function renderCommittee(c){
+  const r = getRec(c.id);
+  return `
+    <div class="page">
+      <div class="page-head">
+        <span class="badge badge-${c.level.toLowerCase()}">${c.level}</span>
+        <h1>${escapeHtml(c.name)}</h1>
+        <a class="ext-link" href="${c.url}" target="_blank" rel="noopener">Committee page ↗</a>
+      </div>
+      <p class="charge">${escapeHtml(c.charge)}</p>
+
+      <div class="card">
+        <h2>Chair Contact</h2>
+        <div class="row">
+          <div>
+            <label>Chair name(s)</label>
+            <input type="text" id="chairName" value="${escapeHtml(r.chairName)}" placeholder="e.g., Jane Smith">
+          </div>
+          <div>
+            <label>Chair email</label>
+            <input type="email" id="chairEmail" value="${escapeHtml(r.chairEmail)}" placeholder="e.g., jsmith@iu.edu">
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn-primary btn" id="emailChairBtn">✉ Email Chair</button>
+        </div>
+        ${c.level==='UFC' ? '<div class="note-small">UFC committee rosters are consolidated on one page — use "Committee page ↗" above and search for this committee\'s section.</div>' : ''}
+      </div>
+
+      <div class="card">
+        <h2>Notes</h2>
+        <textarea id="notes" rows="10" placeholder="Notes, action items, meeting summaries for ${escapeHtml(c.abbr)}...">${escapeHtml(r.notes)}</textarea>
+      </div>
+    </div>
+  `;
+}
+
+function attachCommitteeListeners(c){
+  const nameEl = document.getElementById('chairName');
+  const emailEl = document.getElementById('chairEmail');
+  const notesEl = document.getElementById('notes');
+  [nameEl,emailEl,notesEl].forEach(el=>{
+    el.addEventListener('input', ()=>{
+      setRec(c.id, {chairName:nameEl.value, chairEmail:emailEl.value, notes:notesEl.value});
+      renderSidebarDotsOnly();
+      debouncedSave();
+    });
+  });
+  document.getElementById('emailChairBtn').addEventListener('click', ()=>{
+    const email = emailEl.value.trim();
+    if(!email){ showToast('Add the chair\'s email address first.'); return; }
+    const subject = encodeURIComponent(`BFC ${c.abbr} — `);
+    const body = encodeURIComponent(`Dear ${nameEl.value.trim() || 'Chair'},\n\n\n\nBest,\n${TERM.name}\n${TERM.role}, ${TERM.org}`);
+    window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+  });
+}
+
+function renderBfcWide(){
+  const notes = state.bfcWide.notes || '';
+  return `
+    <div class="page">
+      <div class="page-head"><h1>BFC-Wide Channel</h1></div>
+      <p class="charge">Reach the full BFC membership. IU does not publish a direct all-member listserv, so messages are routed through the BFC office for distribution to the council.</p>
+
+      <div class="card">
+        <h2>Contact All BFC Members</h2>
+        <div class="kv">
+          <div><b>Via</b> ${escapeHtml(BFC_OFFICE.director)}</div>
+          <div><b>Email</b> ${BFC_OFFICE.email}</div>
+          <div><b>Phone</b> ${BFC_OFFICE.phone}</div>
+        </div>
+        <div class="actions">
+          <button class="btn-primary btn" id="emailAllBtn">✉ Email BFC Office (for Council distribution)</button>
+        </div>
+        <div class="note-small">Opens a pre-filled email asking the office to forward your message to the full Council. Edit the draft in your mail app before sending.</div>
+      </div>
+
+      <div class="card">
+        <h2>Council-Wide Notes</h2>
+        <textarea id="bfcWideNotes" rows="12" placeholder="Talking points, term goals, running notes for the full council...">${escapeHtml(notes)}</textarea>
+      </div>
+    </div>
+  `;
+}
+
+function attachBfcWideListeners(){
+  const notesEl = document.getElementById('bfcWideNotes');
+  notesEl.addEventListener('input', ()=>{
+    state.bfcWide.notes = notesEl.value;
+    debouncedSave();
+  });
+  document.getElementById('emailAllBtn').addEventListener('click', ()=>{
+    const subject = encodeURIComponent('Message for BFC Council distribution');
+    const body = encodeURIComponent(`Hello ${BFC_OFFICE.director.split(',')[0]},\n\nCould you please distribute the following message to the BFC Council?\n\n---\n[Your message here]\n---\n\nThank you,\n${TERM.name}\n${TERM.role}, ${TERM.org}`);
+    window.location.href = `mailto:${BFC_OFFICE.email}?subject=${subject}&body=${body}`;
+  });
+}
+
+function renderSidebarDotsOnly(){
+  // cheap refresh of just the dots without losing scroll/focus elsewhere
+  renderSidebar();
+}
+
+/* ---------------- Init ---------------- */
+
+document.getElementById('search').addEventListener('input', (e)=>{
+  searchTerm = e.target.value;
+  renderSidebar();
+});
+document.getElementById('connectBtn').addEventListener('click', connectDataFile);
+document.getElementById('exportBtn').addEventListener('click', exportData);
+document.getElementById('importBtn').addEventListener('click', ()=> document.getElementById('import-input').click());
+document.getElementById('import-input').addEventListener('change', (e)=>{
+  const f = e.target.files[0];
+  if(f) importDataFile(f);
+  e.target.value = '';
+});
+
+async function init(){
+  loadLocalStorage();
+  if(fsApiSupported){
+    await tryReconnectFile();
+  }
+  renderSidebar();
+  selectTab('home');
+  updateStatus();
+}
+init();
+
+})();
+</script>
+</body>
+</html>
