@@ -520,8 +520,10 @@ else if (typeof exports === 'object'){
 /* ---------------- Static reference data ---------------- */
 
 /* Bump this every time the app itself (this file) is edited and re-pushed — it's shown in the
-   sidebar footer so you can tell at a glance whether GitHub Pages is serving your latest push. */
-const APP_BUILD_DATE = "2026-08-15T00:00:00.000Z";
+   sidebar footer so you can tell at a glance whether GitHub Pages is serving your latest push.
+   Use noon UTC (not midnight) so the displayed calendar day is correct in every US timezone —
+   midnight UTC rolls back to "yesterday evening" for anyone west of the UK. */
+const APP_BUILD_DATE = "2026-08-15T12:00:00.000Z";
 
 const DEFAULT_PROFILE = {
   name: "Amr Sabry",
@@ -534,7 +536,7 @@ const DEFAULT_PROFILE = {
    public directory for individual emails) on the SEED_DATE below. These are seeded once —
    INSERT OR IGNORE means they never overwrite anything you've already typed yourself, and you
    can edit any of them at any time as chairs rotate each year. */
-const SEED_DATE = "2026-08-15T00:00:00.000Z";
+const SEED_DATE = "2026-08-15T12:00:00.000Z"; // noon UTC — see note on APP_BUILD_DATE above about avoiding midnight-UTC date rollback
 const SEED_CHAIRS = [
   {id:'bfc-ben',    name:'Cheryl Hughes, Amy Minix',                         email:'ckhughes@iu.edu, alminix@iu.edu'},
   {id:'bfc-bac',    name:'Xin Chen, Dominick DiOrio, Andrew Hopson',         email:'chen437@iu.edu, ddiorio@iu.edu, anhopson@iu.edu'},
@@ -675,10 +677,13 @@ const BFCWIDE_ID = 'bfcwide';
 /* Reference/agenda pages: not committees, but tracked lists with their own dated notes
    (same notes mechanism as committee pages, keyed by these ids in the notes table). */
 const SPECIAL_PAGES = [
-  {id:'coordination', navIcon:'🤝', navLabel:'Coordination', title:'Coordination', intro:'External organizations the BFC coordinates and communicates with.', items:[
+  {id:'coordination', navIcon:'🤝', navLabel:'Coordination', title:'Coordination', intro:'Other governance bodies and external organizations the BFC coordinates and communicates with.', items:[
     {label:'National Council of Faculty Senates (NCFS)', url:'https://ncfs18.org/'},
     {label:'Big Ten Academic Alliance', url:'https://btaa.org/'},
-    {label:'AAUP', url:'https://www.aaup.org/'}
+    {label:'AAUP', url:'https://www.aaup.org/'},
+    {label:'IUB Staff Council — BFC has an ex officio liaison seat', url:'https://staffcouncil.indiana.edu/index.html'},
+    {label:'IU Student Government (undergraduate) — coordination contact', url:'https://iustudentgovernment.indiana.edu/index.html'},
+    {label:'Graduate & Professional Student Government — coordination contact', url:'https://gpsg.indiana.edu/index.html'}
   ]},
   {id:'bot-policies', navIcon:'📋', navLabel:'BOT Policies', title:'BOT Policies', intro:"Policy chairs' agenda — policy topics currently in progress.", items:[
     {label:'AI usage in syllabi'}
@@ -1428,12 +1433,6 @@ function renderHome(){
         </div>
       </div>
 
-      <div class="card">
-        <h2>President-Elect Duties (Reference)</h2>
-        <ul class="ref-list">${dutiesList}</ul>
-        <div class="note-small">Mostly from the Constitution and Bylaws of the Bloomington Faculty, plus one practice-based duty noted as such. Kept here for reference regardless of who currently holds the role — update "Your Profile" above as roles rotate.</div>
-      </div>
-
       <div class="grid-section-label">BFC Leadership Committees</div>
       <div class="grid">${bfcLeadershipTiles}</div>
 
@@ -1451,6 +1450,12 @@ function renderHome(){
 
       <div class="grid-section-label">Agenda &amp; Coordination</div>
       <div class="grid">${refTiles}</div>
+
+      <details class="card" style="margin-top:26px;">
+        <summary style="cursor:pointer;font-weight:700;font-size:15px;">President-Elect Duties (Reference)</summary>
+        <ul class="ref-list" style="margin-top:12px;">${dutiesList}</ul>
+        <div class="note-small">Mostly from the Constitution and Bylaws of the Bloomington Faculty, plus one practice-based duty noted as such. Kept here for reference regardless of who currently holds the role — update "Your Profile" above as roles rotate.</div>
+      </details>
     </div>
   `;
 }
