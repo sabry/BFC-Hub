@@ -522,7 +522,7 @@ else if (typeof exports === 'object'){
 /* Set to the real date/time of the actual edit, every time the app itself (this file) is
    changed and handed off to you to push — shown (with time) near "Welcome" on Home and in the
    sidebar footer, so you can tell at a glance whether GitHub Pages is serving your latest push. */
-const APP_BUILD_DATE = "2026-08-15T23:21:44.000Z";
+const APP_BUILD_DATE = "2026-08-15T23:44:12.000Z";
 
 const DEFAULT_PROFILE = {
   name: "Amr Sabry",
@@ -605,7 +605,8 @@ Thank you for contributing to strong and independent faculty governance within o
 
 —
 
-Scheduling note: the BTAA conference (Dec 3–5) overlaps one monthly meeting — may need to reschedule that session or find someone to fill in.`}
+Scheduling note: the BTAA conference (Dec 3–5) overlaps one monthly meeting — may need to reschedule that session or find someone to fill in.`},
+  {id:'coordination', body:"Research note (Aug 2026): under 2025 state legislation and Board of Trustees policy BOT-02 (\"Establishing University Policies\"), BFC/UFC resolutions are advisory only, and university policy approval runs through the system-wide Policy Executive Committee (PEC) — faculty hold only 3 of roughly 13 voting seats (the three UFC campus co-chairs; the BFC President becomes a UFC co-chair and PEC member during their presidential year). PEC does not hold public meetings; public/faculty comment on policy changes is limited to a 10-day window via policies.iu.edu (submissions to policies@iu.edu). Sources: IU policy BOT-02 (policies.iu.edu) and Indiana Daily Student reporting, Nov. 2025."}
 ];
 
 const BFC_OFFICE = {
@@ -682,7 +683,10 @@ const SPECIAL_PAGES = [
     {label:'AAUP', url:'https://www.aaup.org/'},
     {label:'IUB Staff Council — BFC has an ex officio liaison seat', url:'https://staffcouncil.indiana.edu/index.html'},
     {label:'IU Student Government (undergraduate) — coordination contact', url:'https://iustudentgovernment.indiana.edu/index.html'},
-    {label:'Graduate & Professional Student Government — coordination contact', url:'https://gpsg.indiana.edu/index.html'}
+    {label:'Graduate & Professional Student Government — coordination contact', url:'https://gpsg.indiana.edu/index.html'},
+    {label:'IU Board of Trustees — per BFC Bylaws (BL-ACA-D9), the BFC President represents Bloomington faculty in meetings with the Board', url:'https://trustees.iu.edu/index.html'},
+    {label:'Policy Executive Committee (PEC) — university-wide policy-approval body under BOT-02; the 3 UFC campus co-chairs sit as voting faculty members (the BFC President becomes a UFC co-chair)', url:'https://policies.iu.edu/policies/bot-02-establishing-university-policies/index.html'},
+    {label:'Recent BFC Task Forces (completed): Research Reorganization; Faculty & SAA Mediation/Board of Review Processes; Future of General Education', url:'https://bfc.indiana.edu/committees/taskforce/index.html'}
   ]},
   {id:'bot-policies', navIcon:'📋', navLabel:'BOT Policies', title:'BOT Policies', intro:"Policy chairs' agenda — policy topics currently in progress.", items:[
     {label:'AI usage in syllabi'}
@@ -1399,7 +1403,7 @@ function renderHome(){
     <div class="page" style="max-width:960px;">
       <div class="page-head"><h1>Welcome, ${escapeHtml(profile.name)}</h1></div>
       <p class="charge">${escapeHtml(profile.role)}, ${escapeHtml(profile.org)} &middot; Term ${escapeHtml(profile.termLabel)}${globalUpd?` &middot; Data last updated ${formatDateTime(globalUpd)}`:''}</p>
-      <p class="note-small" style="margin:-8px 0 6px;">App updated ${appBuildLabel()} — this is when the app's code was last changed (separate from "Data last updated" above, which tracks your own edits and notes).</p>
+      <p class="note-small" style="margin:-8px 0 6px;">App updated ${appBuildLabel()}</p>
 
       ${fileNote}
 
