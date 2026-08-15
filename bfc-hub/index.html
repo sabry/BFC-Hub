@@ -763,7 +763,22 @@ function ensureSchema(){
     key TEXT PRIMARY KEY,
     value TEXT
   );`);
+  migrateOldSeedTimestamp();
   seedDefaults();
+}
+
+// One-time fix for a real bug: the very first builds of this app stamped seeded rows with
+// midnight UTC ("2026-08-15T00:00:00.000Z"), which displays as 8pm the previous day in US
+// timezones. SEED_DATE below is now correct (noon UTC), but INSERT OR IGNORE means the fix never
+// touches rows you already have — those keep the old wrong timestamp forever unless we migrate
+// them explicitly. This only rewrites rows that still hold that exact old machine-generated
+// value, so anything you've actually edited yourself (which would carry a real edit timestamp)
+// is left untouched. Safe to run on every load — once migrated, nothing matches anymore.
+function migrateOldSeedTimestamp(){
+  const OLD_BUGGY_SEED_DATE = "2026-08-15T00:00:00.000Z";
+  db.run(`UPDATE committees SET updated_at = ? WHERE updated_at = ?`, [SEED_DATE, OLD_BUGGY_SEED_DATE]);
+  db.run(`UPDATE notes SET created_at = ?, updated_at = ? WHERE created_at = ? AND updated_at = ?`,
+    [SEED_DATE, SEED_DATE, OLD_BUGGY_SEED_DATE, OLD_BUGGY_SEED_DATE]);
 }
 
 function seedDefaults(){
