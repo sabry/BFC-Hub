@@ -782,33 +782,55 @@ let lastSavedAt = null;
 
 function idbOpen(){
   return new Promise((resolve,reject)=>{
-    const req = indexedDB.open('bfcHubDB', 1);
-    req.onupgradeneeded = ()=> req.result.createObjectStore('kv');
+    // v2: an earlier build of this app used object store name 'handles' at v1. Bumping
+    // the version here forces onupgradeneeded to run again for anyone who already has
+    // that older database, so the 'kv' store this code actually uses gets created —
+    // otherwise every read/write silently no-ops forever against a store that was
+    // never created. The contains() check also makes this safe to run from a true
+    // fresh install (no existing database at all).
+    const req = indexedDB.open('bfcHubDB', 2);
+    req.onupgradeneeded = ()=>{
+      const db = req.result;
+      if(!db.objectStoreNames.contains('kv')){
+        db.createObjectStore('kv');
+      }
+    };
     req.onsuccess = ()=> resolve(req.result);
     req.onerror = ()=> reject(req.error);
   });
 }
 async function idbGet(key){
+  let conn;
   try{
-    const conn = await idbOpen();
+    conn = await idbOpen();
     return await new Promise((resolve,reject)=>{
       const tx = conn.transaction('kv','readonly');
       const r = tx.objectStore('kv').get(key);
       r.onsuccess = ()=>resolve(r.result);
       r.onerror = ()=>reject(r.error);
     });
-  }catch(e){ return null; }
+  }catch(e){
+    console.warn('BFC Hub: IndexedDB read failed for', key, e);
+    return null;
+  }finally{
+    if(conn) conn.close();
+  }
 }
 async function idbSet(key,val){
+  let conn;
   try{
-    const conn = await idbOpen();
+    conn = await idbOpen();
     return await new Promise((resolve,reject)=>{
       const tx = conn.transaction('kv','readwrite');
       tx.objectStore('kv').put(val,key);
       tx.oncomplete = ()=>resolve();
       tx.onerror = ()=>reject(tx.error);
     });
-  }catch(e){ /* ignore */ }
+  }catch(e){
+    console.warn('BFC Hub: IndexedDB write failed for', key, e);
+  }finally{
+    if(conn) conn.close();
+  }
 }
 
 /* ---------------- Persistence ---------------- */
