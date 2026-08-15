@@ -305,7 +305,7 @@
   <div id="search-wrap"><input id="search" type="text" placeholder="Search committees..."></div>
   <div id="filters"></div>
   <div id="nav"></div>
-  <div id="sidebar-foot">Indiana University Bloomington</div>
+  <div id="sidebar-foot">Indiana University Bloomington<br><span id="app-build">App updated —</span></div>
 </div>
 
 <div id="main-col">
@@ -519,6 +519,12 @@ else if (typeof exports === 'object'){
 
 /* ---------------- Static reference data ---------------- */
 
+/* Bump this every time the app itself (this file) is edited and re-pushed — it's shown in the
+   sidebar footer so you can tell at a glance whether GitHub Pages is serving your latest push.
+   Use noon UTC (not midnight) so the displayed calendar day is correct in every US timezone —
+   midnight UTC rolls back to "yesterday evening" for anyone west of the UK. */
+const APP_BUILD_DATE = "2026-08-15T12:00:00.000Z";
+
 const DEFAULT_PROFILE = {
   name: "Amr Sabry",
   role: "President-Elect",
@@ -530,7 +536,7 @@ const DEFAULT_PROFILE = {
    public directory for individual emails) on the SEED_DATE below. These are seeded once —
    INSERT OR IGNORE means they never overwrite anything you've already typed yourself, and you
    can edit any of them at any time as chairs rotate each year. */
-const SEED_DATE = "2026-08-15T00:00:00.000Z";
+const SEED_DATE = "2026-08-15T12:00:00.000Z"; // noon UTC — see note on APP_BUILD_DATE above about avoiding midnight-UTC date rollback
 const SEED_CHAIRS = [
   {id:'bfc-ben',    name:'Cheryl Hughes, Amy Minix',                         email:'ckhughes@iu.edu, alminix@iu.edu'},
   {id:'bfc-bac',    name:'Xin Chen, Dominick DiOrio, Andrew Hopson',         email:'chen437@iu.edu, ddiorio@iu.edu, anhopson@iu.edu'},
@@ -571,7 +577,36 @@ const SEED_NOTES = [
   {id:'ufc-oe',    body:"Research note (Aug 2026): Online Education runs as a subcommittee under UFC Academic Affairs rather than a standalone committee. No confirmed public email was found for co-chair Natalia Rybas (IU East)."},
   {id:'ufc-sa',    body:"Research note (Aug 2026): no chair is publicly listed for this committee on the UFC site — ask the UFC office or a fellow UFC representative."},
   {id:'ufc-tp',    body:"Research note (Aug 2026): no chair is publicly listed for this committee on the UFC site — ask the UFC office or a fellow UFC representative."},
-  {id:'bfc-fmrc',  body:"⚠ Research note (Aug 2026): the Elected Committees page lists this chair as \"Seda Durguner (Kelley School of Business)\", but Kelley's faculty directory has two very similarly-named Clinical Associate Professors of Finance — \"Seda Durguner\" and \"Sena Durguner\" — and neither public profile lists an email address. No email has been seeded here; please confirm the correct person and email with the BFC office before relying on this contact."}
+  {id:'bfc-fmrc',  body:"⚠ Research note (Aug 2026): the Elected Committees page lists this chair as \"Seda Durguner (Kelley School of Business)\", but Kelley's faculty directory has two very similarly-named Clinical Associate Professors of Finance — \"Seda Durguner\" and \"Sena Durguner\" — and neither public profile lists an email address. No email has been seeded here; please confirm the correct person and email with the BFC office before relying on this contact."},
+  {id:'policy-chairs', body:`Draft invitation email (Aug 2026, sent under Heather Akou's name — check with Virginia/Heather before reusing verbatim):
+
+Subject: Invitation — Monthly Policy Committee Chairs Meetings
+
+Heather Akou, president of the Bloomington Faculty Council, invites you to attend the monthly Policy Committee Chairs meetings at Wells House.
+
+These meetings provide a forum for Policy Committee Chairs to compare policy developments across schools, coordinate faculty-led policy work within their units, and bring common concerns to the Bloomington Faculty Council and campus and university policy processes. Their purpose is to strengthen the faculty's capacity to shape school-level policy and to coordinate a strong faculty response when campus or university actions affect teaching, research, tenure, academic freedom, or unit governance.
+
+In the past two years, meetings have addressed SEA 202 and post-tenure review, both of which have significant consequences for faculty and for school-level policies and procedures. This year's priorities will be developed collectively by the participating chairs, beginning at the first meeting, and will continue to evolve in response to concerns raised by faculty across the campus.
+
+Possible areas for collective work include:
+
+- Developing and sharing faculty-led models for syllabus guidance concerning generative AI. Such guidance should help students understand what is permitted while preserving instructor judgment and disciplinary differences. Models could address courses that minimize AI use, incorporate it centrally, or permit limited use with appropriate acknowledgment and disclosure.
+
+- Reviewing new or revised university policies, identifying their implications for school- and department-level policies and practices, and coordinating recommendations or responses that protect peer review, due process, academic freedom, and faculty governance.
+
+- Examining proposed program changes, reorganizations, mergers, or closures through the appropriate school governance processes.
+
+These examples are not intended to determine or limit the agenda. Policy Committee Chairs are encouraged to bring forward matters requiring collective attention throughout the year. Any resulting policy proposals, model language, or recommendations would be considered through the appropriate school, department, or campus governance process.
+
+The meetings are intended principally as a forum for Policy Committee Chairs. If you cannot attend, please designate a faculty representative to participate in your place. Deans are welcome, although their attendance is not required.
+
+We will use Microsoft Teams for communication and document sharing. A remote participation option will also be available for each meeting.
+
+Thank you for contributing to strong and independent faculty governance within our schools and across the Bloomington campus.
+
+—
+
+Scheduling note: the BTAA conference (Dec 3–5) overlaps one monthly meeting — may need to reschedule that session or find someone to fill in.`}
 ];
 
 const BFC_OFFICE = {
@@ -601,6 +636,11 @@ const BFC_COMMITTEES = [
   {id:'bfc-tpc',   abbr:'TPC',    name:'Technology Policy Committee', charge:'Develops policies on technologies used for research and teaching.', url:'https://bfc.indiana.edu/committees/standing/tpc/index.html'}
 ];
 
+// These three run the BFC itself (agenda-setting, elections, strategic planning) rather than
+// covering a policy domain — kept in BFC_COMMITTEES for the full-list/search logic, but broken
+// out into their own nav/home group so they read as leadership committees, not standing ones.
+const BFC_LEADERSHIP_IDS = ['bfc-ec', 'bfc-nomcom', 'bfc-lrpc'];
+
 const UFC_COMMITTEES = [
   {id:'ufc-aa', abbr:'AA', name:'Academic Affairs', charge:'Oversees academic-related matters across IU campuses, with faculty representation from each institution.', url:'https://ufc.iu.edu/committees/aac.html'},
   {id:'ufc-ba', abbr:'BA', name:'Budgetary Advisory', charge:'Addresses fiscal and financial planning concerns; includes an ex-officio CFO member.', url:'https://ufc.iu.edu/committees/bac.html'},
@@ -612,6 +652,9 @@ const UFC_COMMITTEES = [
   {id:'ufc-sa', abbr:'SA', name:'Student Affairs', charge:'Focuses on student-related policies and support services university-wide.', url:'https://ufc.iu.edu/committees/sac.html'},
   {id:'ufc-tp', abbr:'TP', name:'Technology Policy', charge:'Oversees technology standards and digital infrastructure matters university-wide.', url:'https://ufc.iu.edu/committees/tpc.html'}
 ];
+
+// Same treatment as BFC_LEADERSHIP_IDS above — the UFC Executive Committee runs the UFC itself.
+const UFC_EXEC_IDS = ['ufc-ec'];
 
 const BFC_ELECTED_COMMITTEES = [
   {id:'bfc-fmc',    abbr:'FMC',    name:'Faculty Mediation Committee', charge:'Serves all faculty and librarians by hearing their concerns and supporting efforts towards informal resolution of grievances.', url:'https://bfc.indiana.edu/committees/elected/index.html'},
@@ -634,13 +677,24 @@ const BFCWIDE_ID = 'bfcwide';
 /* Reference/agenda pages: not committees, but tracked lists with their own dated notes
    (same notes mechanism as committee pages, keyed by these ids in the notes table). */
 const SPECIAL_PAGES = [
-  {id:'coordination', navIcon:'🤝', navLabel:'Coordination', title:'Coordination', intro:'External organizations the BFC coordinates and communicates with.', items:[
+  {id:'coordination', navIcon:'🤝', navLabel:'Coordination', title:'Coordination', intro:'Other governance bodies and external organizations the BFC coordinates and communicates with.', items:[
     {label:'National Council of Faculty Senates (NCFS)', url:'https://ncfs18.org/'},
     {label:'Big Ten Academic Alliance', url:'https://btaa.org/'},
-    {label:'AAUP', url:'https://www.aaup.org/'}
+    {label:'AAUP', url:'https://www.aaup.org/'},
+    {label:'IUB Staff Council — BFC has an ex officio liaison seat', url:'https://staffcouncil.indiana.edu/index.html'},
+    {label:'IU Student Government (undergraduate) — coordination contact', url:'https://iustudentgovernment.indiana.edu/index.html'},
+    {label:'Graduate & Professional Student Government — coordination contact', url:'https://gpsg.indiana.edu/index.html'}
   ]},
   {id:'bot-policies', navIcon:'📋', navLabel:'BOT Policies', title:'BOT Policies', intro:"Policy chairs' agenda — policy topics currently in progress.", items:[
     {label:'AI usage in syllabi'}
+  ]},
+  {id:'policy-chairs', navIcon:'📝', navLabel:'Policy Chairs', title:'Policy Committee Chairs', intro:'Monthly meetings (Wells House) that the BFC President-Elect organizes and chairs, under the BFC President’s invitation. A forum for school-level Policy Committee Chairs to compare policy developments across schools, coordinate faculty-led policy work, and bring common concerns to the BFC and to campus/university policy processes.', items:[
+    {label:'Priority: faculty-led models for syllabus guidance on generative AI'},
+    {label:'Priority: review new/revised university policies for school-level implications; coordinate responses protecting peer review, due process, academic freedom, and faculty governance'},
+    {label:'Priority: examine proposed program changes, reorganizations, mergers, or closures through appropriate school governance'},
+    {label:'Past topics: SEA 202 and post-tenure review'},
+    {label:'Logistics: Microsoft Teams for communication/document sharing; remote participation offered each meeting'},
+    {label:'Scheduling note: BTAA conference (Dec 3–5) overlaps one monthly meeting — reschedule or arrange a substitute'}
   ]},
   {id:'iub-issues', navIcon:'🏫', navLabel:'IUB Issues', title:'IUB Issues', intro:'Campus-level issues and initiatives being tracked this term.', items:[
     {label:'Spread 10-month contracts over 12 months'},
@@ -662,7 +716,8 @@ const PRESIDENT_ELECT_DUTIES = [
   'To preside at meetings of the Bloomington Faculty Council in the absence of the University President, the Provost, and the President.',
   'To substitute temporarily for the President in the execution of the duties specified in Bylaw 10, when unavoidable circumstances prohibit them from fulfilling those obligations.',
   'To serve as Chair of the Nomination Committee.',
-  'To be the liaison between the Executive Committee and the standing committees.'
+  'To be the liaison between the Executive Committee and the standing committees.',
+  'To organize and chair the monthly Policy Committee Chairs meetings, coordinating faculty-led policy work across schools (practice, not separately codified in the Constitution/Bylaws).'
 ];
 
 /* ---------------- SQLite engine (sql.js) ---------------- */
@@ -708,7 +763,22 @@ function ensureSchema(){
     key TEXT PRIMARY KEY,
     value TEXT
   );`);
+  migrateOldSeedTimestamp();
   seedDefaults();
+}
+
+// One-time fix for a real bug: the very first builds of this app stamped seeded rows with
+// midnight UTC ("2026-08-15T00:00:00.000Z"), which displays as 8pm the previous day in US
+// timezones. SEED_DATE below is now correct (noon UTC), but INSERT OR IGNORE means the fix never
+// touches rows you already have — those keep the old wrong timestamp forever unless we migrate
+// them explicitly. This only rewrites rows that still hold that exact old machine-generated
+// value, so anything you've actually edited yourself (which would carry a real edit timestamp)
+// is left untouched. Safe to run on every load — once migrated, nothing matches anymore.
+function migrateOldSeedTimestamp(){
+  const OLD_BUGGY_SEED_DATE = "2026-08-15T00:00:00.000Z";
+  db.run(`UPDATE committees SET updated_at = ? WHERE updated_at = ?`, [SEED_DATE, OLD_BUGGY_SEED_DATE]);
+  db.run(`UPDATE notes SET created_at = ?, updated_at = ? WHERE created_at = ? AND updated_at = ?`,
+    [SEED_DATE, SEED_DATE, OLD_BUGGY_SEED_DATE, OLD_BUGGY_SEED_DATE]);
 }
 
 function seedDefaults(){
@@ -1098,6 +1168,13 @@ function updateBrandSub(){
   const p = getProfile();
   document.getElementById('brand-sub').textContent = `${p.name} · ${p.role}, ${p.org}`;
 }
+function updateAppBuildFooter(){
+  const el = document.getElementById('app-build');
+  if(!el) return;
+  const d = new Date(APP_BUILD_DATE);
+  const label = isNaN(d.getTime()) ? '' : d.toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'});
+  el.textContent = `App updated ${label}`;
+}
 let toastTimer=null;
 function showToast(msg){
   const t = document.getElementById('toast');
@@ -1158,30 +1235,45 @@ function renderSidebar(){
     html += navItem('bfcwide', '📣 BFC-Wide Channel', noteCount(BFCWIDE_ID) > 0);
   }
 
-  const bfcFiltered = BFC_COMMITTEES.filter(filterFn('BFC'));
-  if(bfcFiltered.length){
+  const bfcAllFiltered = BFC_COMMITTEES.filter(filterFn('BFC'));
+  const bfcLeadershipFiltered = bfcAllFiltered.filter(c=>BFC_LEADERSHIP_IDS.includes(c.id));
+  const bfcStandingFiltered = bfcAllFiltered.filter(c=>!BFC_LEADERSHIP_IDS.includes(c.id));
+  if(bfcLeadershipFiltered.length){
+    html += `<div class="nav-group-label">BFC Leadership Committees</div>`;
+    html += bfcLeadershipFiltered.map(c=>navItem(c.id, c.name, committeeHasData(c.id), c.abbr)).join('');
+  }
+  if(bfcStandingFiltered.length){
     html += `<div class="nav-group-label">BFC Standing Committees</div>`;
-    html += bfcFiltered.map(c=>navItem(c.id, c.name, committeeHasData(c.id), c.abbr)).join('');
+    html += bfcStandingFiltered.map(c=>navItem(c.id, c.name, committeeHasData(c.id), c.abbr)).join('');
   }
   const electedFiltered = BFC_ELECTED_COMMITTEES.filter(filterFn('BFC-ELECTED'));
   if(electedFiltered.length){
     html += `<div class="nav-group-label">BFC Elected Committees</div>`;
     html += electedFiltered.map(c=>navItem(c.id, c.name, committeeHasData(c.id), c.abbr)).join('');
   }
-  const ufcFiltered = UFC_COMMITTEES.filter(filterFn('UFC'));
-  if(ufcFiltered.length){
-    html += `<div class="nav-group-label">UFC Standing Committees</div>`;
-    html += ufcFiltered.map(c=>navItem(c.id, c.name, committeeHasData(c.id), c.abbr)).join('');
+  const ufcAllFiltered = UFC_COMMITTEES.filter(filterFn('UFC'));
+  const ufcExecFiltered = ufcAllFiltered.filter(c=>UFC_EXEC_IDS.includes(c.id));
+  const ufcStandingFiltered = ufcAllFiltered.filter(c=>!UFC_EXEC_IDS.includes(c.id));
+  if(ufcExecFiltered.length){
+    html += `<div class="nav-group-label">UFC Executive Committee</div>`;
+    html += ufcExecFiltered.map(c=>navItem(c.id, c.name, committeeHasData(c.id), c.abbr)).join('');
   }
-  if(!bfcFiltered.length && !electedFiltered.length && !ufcFiltered.length){
+  if(ufcStandingFiltered.length){
+    html += `<div class="nav-group-label">UFC Standing Committees</div>`;
+    html += ufcStandingFiltered.map(c=>navItem(c.id, c.name, committeeHasData(c.id), c.abbr)).join('');
+  }
+  if(!bfcLeadershipFiltered.length && !bfcStandingFiltered.length && !electedFiltered.length && !ufcExecFiltered.length && !ufcStandingFiltered.length){
     const reason = term ? `match "${escapeHtml(searchTerm)}"` : 'match this filter';
     html += `<div style="padding:14px 16px;font-size:12.5px;color:var(--ink-soft);">No committees ${reason}.</div>`;
   }
 
-  const showRef = activeFilter==='all' || activeFilter==='bfc' || (activeFilter==='notes' && SPECIAL_PAGES.some(p=>noteCount(p.id) > 0));
+  const showRef = activeFilter==='all' || activeFilter==='bfc' || activeFilter==='notes';
   if(showRef && !term){
-    html += `<div class="nav-group-label">Agenda &amp; Coordination</div>`;
-    html += SPECIAL_PAGES.map(p=>navItem(p.id, `${p.navIcon} ${p.navLabel}`, noteCount(p.id) > 0)).join('');
+    const refItems = activeFilter==='notes' ? SPECIAL_PAGES.filter(p=>noteCount(p.id) > 0) : SPECIAL_PAGES;
+    if(refItems.length){
+      html += `<div class="nav-group-label">Agenda &amp; Coordination</div>`;
+      html += refItems.map(p=>navItem(p.id, `${p.navIcon} ${p.navLabel}`, noteCount(p.id) > 0)).join('');
+    }
   }
   nav.innerHTML = html;
 
@@ -1278,9 +1370,11 @@ function renderHome(){
       </div>
     </div>`;
   }
-  const bfcTiles = BFC_COMMITTEES.map(c=>tileFor({...c, level:'BFC'})).join('');
+  const bfcLeadershipTiles = BFC_COMMITTEES.filter(c=>BFC_LEADERSHIP_IDS.includes(c.id)).map(c=>tileFor({...c, level:'BFC'})).join('');
+  const bfcStandingTiles = BFC_COMMITTEES.filter(c=>!BFC_LEADERSHIP_IDS.includes(c.id)).map(c=>tileFor({...c, level:'BFC'})).join('');
   const electedTiles = BFC_ELECTED_COMMITTEES.map(c=>tileFor({...c, level:'BFC-ELECTED'})).join('');
-  const ufcTiles = UFC_COMMITTEES.map(c=>tileFor({...c, level:'UFC'})).join('');
+  const ufcExecTiles = UFC_COMMITTEES.filter(c=>UFC_EXEC_IDS.includes(c.id)).map(c=>tileFor({...c, level:'UFC'})).join('');
+  const ufcStandingTiles = UFC_COMMITTEES.filter(c=>!UFC_EXEC_IDS.includes(c.id)).map(c=>tileFor({...c, level:'UFC'})).join('');
 
   const refTiles = SPECIAL_PAGES.map(p=>{
     const n = noteCount(p.id);
@@ -1354,23 +1448,29 @@ function renderHome(){
         </div>
       </div>
 
-      <div class="card">
-        <h2>President-Elect Duties (Reference)</h2>
-        <ul class="ref-list">${dutiesList}</ul>
-        <div class="note-small">From the Constitution and Bylaws of the Bloomington Faculty. Kept here for reference regardless of who currently holds the role — update "Your Profile" above as roles rotate.</div>
-      </div>
+      <div class="grid-section-label">BFC Leadership Committees</div>
+      <div class="grid">${bfcLeadershipTiles}</div>
 
       <div class="grid-section-label">BFC Standing Committees</div>
-      <div class="grid">${bfcTiles}</div>
+      <div class="grid">${bfcStandingTiles}</div>
 
       <div class="grid-section-label">BFC Elected Committees</div>
       <div class="grid">${electedTiles}</div>
 
+      <div class="grid-section-label">UFC Executive Committee</div>
+      <div class="grid">${ufcExecTiles}</div>
+
       <div class="grid-section-label">UFC Standing Committees</div>
-      <div class="grid">${ufcTiles}</div>
+      <div class="grid">${ufcStandingTiles}</div>
 
       <div class="grid-section-label">Agenda &amp; Coordination</div>
       <div class="grid">${refTiles}</div>
+
+      <details class="card" style="margin-top:26px;">
+        <summary style="cursor:pointer;font-weight:700;font-size:15px;">President-Elect Duties (Reference)</summary>
+        <ul class="ref-list" style="margin-top:12px;">${dutiesList}</ul>
+        <div class="note-small">Mostly from the Constitution and Bylaws of the Bloomington Faculty, plus one practice-based duty noted as such. Kept here for reference regardless of who currently holds the role — update "Your Profile" above as roles rotate.</div>
+      </details>
     </div>
   `;
 }
@@ -1670,6 +1770,7 @@ async function init(){
   ensureSchema();
 
   updateBrandSub();
+  updateAppBuildFooter();
   initTab();
   updateStatus();
 }
