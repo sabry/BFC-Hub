@@ -314,10 +314,10 @@
     <button class="btn navbtn" id="forwardBtn" title="Forward">→</button>
     <div id="status"><span class="sdot"></span><span id="status-text">Loading database engine…</span></div>
     <div class="spacer"></div>
-    <button class="btn" id="connectBtn">🔗 Connect Data File</button>
-    <button class="btn" id="exportBtn">⬇ Export</button>
-    <button class="btn" id="importBtn">⬆ Import</button>
-    <button class="btn" id="exportPublicBtn">📤 Publish Public Snapshot</button>
+    <button class="btn" id="connectBtn" title="Save your own copy of this data (notes included) to a file on your device — stays private to you">🔗 Connect Data File</button>
+    <button class="btn" id="exportBtn" title="Download your own local copy as a .sqlite file">⬇ Export</button>
+    <button class="btn" id="importBtn" title="Load a previously exported .sqlite file">⬆ Import</button>
+    <button class="btn" id="exportPublicBtn" title="Download a shareable read-only page — committee info only, no notes">📤 Publish Public Snapshot</button>
     <input type="file" id="import-input" accept=".sqlite,.db,application/x-sqlite3">
   </div>
   <div id="main"><div id="loading">Loading database engine…</div></div>
@@ -523,7 +523,7 @@ else if (typeof exports === 'object'){
 /* Set to the real date/time of the actual edit, every time the app itself (this file) is
    changed and handed off to you to push — shown (with time) near "Welcome" on Home and in the
    sidebar footer, so you can tell at a glance whether GitHub Pages is serving your latest push. */
-const APP_BUILD_DATE = "2026-08-16T00:48:04.000Z";
+const APP_BUILD_DATE = "2026-08-16T01:08:45.000Z";
 
 /* Update this once you've created a suggestions form (Google Forms or Microsoft Forms both work
    fine — a few fields like "Your name (optional)", "Your suggestion", "Which area does this
@@ -1109,7 +1109,7 @@ function updateStatus(){
     connectBtn.textContent = '🔗 Connect Data File';
   } else {
     el.classList.add('warn');
-    txt.textContent = 'Not linked to a file yet — click "Connect Data File" to save permanently on your Mac';
+    txt.textContent = 'Not linked to a file yet — click "Connect Data File" to save permanently on your computer';
     connectBtn.textContent = '🔗 Connect Data File';
   }
 }
@@ -1754,6 +1754,7 @@ function renderNotesSection(committeeId, placeholder){
   return `
     <div class="card" data-committee="${committeeId}">
       <h2>Notes <span class="note-count">${notes.length}</span></h2>
+      <div class="note-small" style="margin:-4px 0 12px;">🔒 Private to you — notes are saved only on your own device (or the file you connect), never uploaded or visible to anyone else who opens this page.</div>
       <div id="notesList">${items}</div>
       <div class="actions">
         <button class="btn" id="addNoteBtn">+ Add Note</button>
