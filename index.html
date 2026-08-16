@@ -522,7 +522,7 @@ else if (typeof exports === 'object'){
 /* Set to the real date/time of the actual edit, every time the app itself (this file) is
    changed and handed off to you to push — shown (with time) near "Welcome" on Home and in the
    sidebar footer, so you can tell at a glance whether GitHub Pages is serving your latest push. */
-const APP_BUILD_DATE = "2026-08-16T01:35:29.000Z";
+const APP_BUILD_DATE = "2026-08-16T09:48:43.000Z";
 
 /* Update this once you've created a suggestions form (Google Forms or Microsoft Forms both work
    fine — a few fields like "Your name (optional)", "Your suggestion", "Which area does this
@@ -570,7 +570,40 @@ const SEED_CHAIRS = [
   {id:'bfc-saabor', name:'Spencer Hall',                                     email:'sprhall@iu.edu'},
   {id:'bfc-ac',     name:'Rebecca Butters',                                  email:'rebutter@iu.edu'}
 ];
-const SEED_NOTES = [
+/* These used to be pre-seeded into the private "Notes" table (via SEED_NOTES), which was wrong:
+   every fresh install — including a brand-new phone that has never opened this app before — got
+   the exact same rows, under a heading that says "Private to you." They aren't anyone's private
+   notes; they're shared research/reference content baked into this file's source, so they belong
+   as ordinary public page content instead. CHAIR_CAVEATS renders as a small callout under Chair
+   Contact on committee pages; SPECIAL_PAGE_BACKGROUND renders under the intro on reference pages.
+   MigrateRemoveLegacySeedNotes() below cleans the old seeded rows out of any database (yours or
+   anyone else's) that already picked them up before this fix. */
+const CHAIR_CAVEATS = {
+  'bfc-epc':   "Connie Cook's public directory email (cglen@iu.edu) has a username that doesn't match her surname — worth a quick verification before relying on it for official correspondence.",
+  'bfc-sac':   "No public directory email could be confirmed for co-chair Joe Varga (School of Social Work). Ask the BFC office or a fellow committee member for his current contact.",
+  'bfc-saaac': "No public directory email could be confirmed for co-chair Matthew Jackson (GPSG-SAA representative, likely a graduate student). Ask the BFC office for his current contact.",
+  'ufc-aa':    "UFC's page for this committee was still showing what appears to be the 2025-2026 roster as of last check; the 2026-2027 rollover may not be posted yet. Verify chair names before relying on them. Also, no confirmed public email was found for co-chair Krista Hoffmann-Longtin.",
+  'ufc-ba':    "UFC's page for this committee showed a stale roster with terms listed as 2023-2025 as of last check. The chair names/emails here may be outdated — verify with the UFC office before relying on them.",
+  'ufc-fa':    "No chair is publicly listed for this committee. Per UFC Bylaws, the committee selects its own chair internally — ask the UFC office or a fellow UFC representative who currently holds that role.",
+  'ufc-ra':    "No chair is publicly listed. The committee is described as co-chaired by a nominee from each of the IU Indianapolis and IU Bloomington research affairs committees, but current names weren't published — ask the UFC office.",
+  'ufc-hd':    "No chair is publicly listed. Per policy ACA-62 the chair is selected by the UFC Executive Committee — ask the UFC office for the current holder.",
+  'ufc-oe':    "Online Education runs as a subcommittee under UFC Academic Affairs rather than a standalone committee. No confirmed public email was found for co-chair Natalia Rybas (IU East).",
+  'ufc-sa':    "No chair is publicly listed for this committee on the UFC site — ask the UFC office or a fellow UFC representative.",
+  'ufc-tp':    "No chair is publicly listed for this committee on the UFC site — ask the UFC office or a fellow UFC representative.",
+  'bfc-fmrc':  "The chair name listed for this committee couldn't be fully confirmed against the public directory — please verify the correct person and email with the BFC office before relying on this contact."
+};
+const SPECIAL_PAGE_BACKGROUND = {
+  'policy-chairs': "The invitation email for these meetings is drafted separately (not stored here) — check with Virginia/Heather for the current version before sending. Scheduling note: the BTAA conference (Dec 3–5) overlaps one monthly meeting — may need to reschedule that session or find someone to fill in.",
+  'coordination': "Under 2025 state legislation and Board of Trustees policy BOT-02 (\"Establishing University Policies\"), BFC/UFC resolutions are advisory only, and university policy approval runs through the system-wide Policy Executive Committee (PEC) — faculty hold only 3 of roughly 13 voting seats (the three UFC campus co-chairs; the BFC President becomes a UFC co-chair and PEC member during their presidential year). PEC does not hold public meetings; public/faculty comment on policy changes is limited to a 10-day window via policies.iu.edu (submissions to policies@iu.edu). Sources: IU policy BOT-02 (policies.iu.edu) and Indiana Daily Student reporting, Nov. 2025.",
+  'bot-policies': "The Policy Alignment Initiative's main tranche (26 university-level policies) appears largely complete as of the Aug 14, 2026 BOT-34 approval — policies.iu.edu/under-review/index.html showed nothing actively open for comment as of last check. The IU Bloomington AAUP chapter's own tracker (iubaaup.org) separately lists ACA-17 (Faculty Board of Review Uniform Standards), HR-06-80 (Remote Work), and HR-04-30 (Employee Benefit Plans) as under review, but with Feb–Apr 2026 submission dates that may now be stale — their current status is unconfirmed. This whole list is dynamic; recheck policies.iu.edu directly (it loads its under-review list dynamically, so an automated check can miss recent postings).",
+  'state-national': "This list reflects what's publicly confirmed as of last check; Indiana's legislature runs annual sessions (short/budget session in even years, ~Jan–Mar), so new bills should be expected each session and this needs periodic re-review. Interim study committee topics for the 2027 session weren't confirmable via automated search as of Aug 2026 — check iga.in.gov/2026/committees/interim directly for the current list, especially anything following up on SEA 199's low-enrollment-program review (final list due 2027)."
+};
+
+/* Exact bodies ever shipped in the old SEED_NOTES seeding mechanism (both the original text and,
+   for the two that were redacted for privacy in an earlier fix, the intermediate redacted text)
+   — used only to delete stray rows a database may have already picked up before this fix. Not
+   used for display; nothing here is re-seeded. */
+const LEGACY_SEED_NOTE_BODIES = [
   {id:'bfc-epc',   body:"Research note (Aug 2026): Connie Cook's public directory email (cglen@iu.edu) has a username that doesn't match her surname — worth a quick verification before relying on it for official correspondence."},
   {id:'bfc-sac',   body:"Research note (Aug 2026): no public directory email could be confirmed for co-chair Joe Varga (School of Social Work). Ask the BFC office or a fellow committee member for his current contact."},
   {id:'bfc-saaac', body:"Research note (Aug 2026): no public directory email could be confirmed for co-chair Matthew Jackson (GPSG-SAA representative, likely a graduate student). Ask the BFC office for his current contact."},
@@ -583,7 +616,37 @@ const SEED_NOTES = [
   {id:'ufc-sa',    body:"Research note (Aug 2026): no chair is publicly listed for this committee on the UFC site — ask the UFC office or a fellow UFC representative."},
   {id:'ufc-tp',    body:"Research note (Aug 2026): no chair is publicly listed for this committee on the UFC site — ask the UFC office or a fellow UFC representative."},
   {id:'bfc-fmrc',  body:"Research note (Aug 2026): the chair name listed for this committee couldn't be fully confirmed against the public directory — please verify the correct person and email with the BFC office before relying on this contact."},
+  {id:'bfc-fmrc',  body:"⚠ Research note (Aug 2026): the Elected Committees page lists this chair as \"Seda Durguner (Kelley School of Business)\", but Kelley's faculty directory has two very similarly-named Clinical Associate Professors of Finance — \"Seda Durguner\" and \"Sena Durguner\" — and neither public profile lists an email address. No email has been seeded here; please confirm the correct person and email with the BFC office before relying on this contact."},
   {id:'policy-chairs', body:"Note: the invitation email for these meetings is drafted separately (not stored here) — check with Virginia/Heather for the current version before sending. Scheduling note: the BTAA conference (Dec 3–5) overlaps one monthly meeting — may need to reschedule that session or find someone to fill in."},
+  {id:'policy-chairs', body:`Draft invitation email (Aug 2026, sent under Heather Akou's name — check with Virginia/Heather before reusing verbatim):
+
+Subject: Invitation — Monthly Policy Committee Chairs Meetings
+
+Heather Akou, president of the Bloomington Faculty Council, invites you to attend the monthly Policy Committee Chairs meetings at Wells House.
+
+These meetings provide a forum for Policy Committee Chairs to compare policy developments across schools, coordinate faculty-led policy work within their units, and bring common concerns to the Bloomington Faculty Council and campus and university policy processes. Their purpose is to strengthen the faculty's capacity to shape school-level policy and to coordinate a strong faculty response when campus or university actions affect teaching, research, tenure, academic freedom, or unit governance.
+
+In the past two years, meetings have addressed SEA 202 and post-tenure review, both of which have significant consequences for faculty and for school-level policies and procedures. This year's priorities will be developed collectively by the participating chairs, beginning at the first meeting, and will continue to evolve in response to concerns raised by faculty across the campus.
+
+Possible areas for collective work include:
+
+- Developing and sharing faculty-led models for syllabus guidance concerning generative AI. Such guidance should help students understand what is permitted while preserving instructor judgment and disciplinary differences. Models could address courses that minimize AI use, incorporate it centrally, or permit limited use with appropriate acknowledgment and disclosure.
+
+- Reviewing new or revised university policies, identifying their implications for school- and department-level policies and practices, and coordinating recommendations or responses that protect peer review, due process, academic freedom, and faculty governance.
+
+- Examining proposed program changes, reorganizations, mergers, or closures through the appropriate school governance processes.
+
+These examples are not intended to determine or limit the agenda. Policy Committee Chairs are encouraged to bring forward matters requiring collective attention throughout the year. Any resulting policy proposals, model language, or recommendations would be considered through the appropriate school, department, or campus governance process.
+
+The meetings are intended principally as a forum for Policy Committee Chairs. If you cannot attend, please designate a faculty representative to participate in your place. Deans are welcome, although their attendance is not required.
+
+We will use Microsoft Teams for communication and document sharing. A remote participation option will also be available for each meeting.
+
+Thank you for contributing to strong and independent faculty governance within our schools and across the Bloomington campus.
+
+—
+
+Scheduling note: the BTAA conference (Dec 3–5) overlaps one monthly meeting — may need to reschedule that session or find someone to fill in.`},
   {id:'coordination', body:"Research note (Aug 2026): under 2025 state legislation and Board of Trustees policy BOT-02 (\"Establishing University Policies\"), BFC/UFC resolutions are advisory only, and university policy approval runs through the system-wide Policy Executive Committee (PEC) — faculty hold only 3 of roughly 13 voting seats (the three UFC campus co-chairs; the BFC President becomes a UFC co-chair and PEC member during their presidential year). PEC does not hold public meetings; public/faculty comment on policy changes is limited to a 10-day window via policies.iu.edu (submissions to policies@iu.edu). Sources: IU policy BOT-02 (policies.iu.edu) and Indiana Daily Student reporting, Nov. 2025."},
   {id:'bot-policies', body:"Research note (Aug 2026): the Policy Alignment Initiative's main tranche (26 university-level policies) appears largely complete as of the Aug 14, 2026 BOT-34 approval — policies.iu.edu/under-review/index.html showed nothing actively open for comment as of this check. The IU Bloomington AAUP chapter's own tracker (iubaaup.org) separately lists ACA-17 (Faculty Board of Review Uniform Standards), HR-06-80 (Remote Work), and HR-04-30 (Employee Benefit Plans) as under review, but with Feb–Apr 2026 submission dates that may now be stale — their current status is unconfirmed. This whole list is dynamic; recheck policies.iu.edu directly (it loads its under-review list dynamically, so an automated check can miss recent postings)."},
   {id:'state-national', body:"Research note (Aug 2026): this list reflects what's publicly confirmed as of this check; Indiana's legislature runs annual sessions (short/budget session in even years, ~Jan–Mar), so new bills should be expected each session and this needs periodic re-review. Interim study committee topics for the 2027 session weren't confirmable via automated search as of Aug 2026 — check iga.in.gov/2026/committees/interim directly for the current list, especially anything following up on SEA 199's low-enrollment-program review (final list due 2027)."}
@@ -825,7 +888,21 @@ function ensureSchema(){
     value TEXT
   );`);
   migrateOldSeedTimestamp();
+  migrateRemoveLegacySeedNotes();
   seedDefaults();
+}
+
+// One-time cleanup: this app used to pre-seed the private "Notes" table with shared research
+// content (see LEGACY_SEED_NOTE_BODIES above) — wrong, since it meant every fresh install, on
+// any device, silently got the same rows under a "Private to you" label. That content now lives
+// as ordinary public page content (CHAIR_CAVEATS / SPECIAL_PAGE_BACKGROUND) instead, and nothing
+// is seeded into notes anymore. This deletes any of those old rows a database already picked up,
+// matching on exact (committee_id, body) so anything you've actually written yourself — which
+// won't match this exact text — is never touched. Safe to run on every load.
+function migrateRemoveLegacySeedNotes(){
+  LEGACY_SEED_NOTE_BODIES.forEach(sn=>{
+    db.run(`DELETE FROM notes WHERE committee_id = ? AND body = ?`, [sn.id, sn.body]);
+  });
 }
 
 // One-time fix for a real bug: the very first builds of this app stamped seeded rows with
@@ -859,12 +936,6 @@ function seedDefaults(){
       `INSERT OR IGNORE INTO committees (id, chair_name, chair_email, updated_at) VALUES (?,?,?,?)`,
       [sc.id, sc.name, sc.email, SEED_DATE]
     );
-  });
-  SEED_NOTES.forEach(sn=>{
-    const already = queryOne(`SELECT id FROM notes WHERE committee_id=? AND body=?`, [sn.id, sn.body]);
-    if(!already){
-      db.run(`INSERT INTO notes (committee_id, body, created_at, updated_at) VALUES (?,?,?,?)`, [sn.id, sn.body, SEED_DATE, SEED_DATE]);
-    }
   });
 }
 
@@ -1612,6 +1683,7 @@ function renderCommittee(c){
           <button class="btn-primary btn" id="emailChairBtn">✉ Email Chair</button>
         </div>
         <div class="note-small">Chairs rotate most years — double-check against "Committee page ↗" above before relying on this for something time-sensitive.</div>
+        ${CHAIR_CAVEATS[c.id] ? `<div class="note-small" style="margin-top:6px;">ℹ️ ${escapeHtml(CHAIR_CAVEATS[c.id])}</div>` : ''}
       </div>
 
       ${renderNotesSection(c.id, `Notes, action items, meeting summaries for ${escapeHtml(c.abbr)}...`)}
@@ -1688,6 +1760,7 @@ function renderSpecialPage(p){
       <div class="card">
         <h2>Tracked Items</h2>
         <ul class="ref-list">${items}</ul>
+        ${SPECIAL_PAGE_BACKGROUND[p.id] ? `<div class="note-small" style="margin-top:10px;">ℹ️ ${escapeHtml(SPECIAL_PAGE_BACKGROUND[p.id])}</div>` : ''}
       </div>
 
       ${renderNotesSection(p.id, `Notes, status, next steps for ${escapeHtml(p.title)}...`)}
