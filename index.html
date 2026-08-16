@@ -317,7 +317,6 @@
     <button class="btn" id="connectBtn" title="Save your own copy of this data (notes included) to a file on your device — stays private to you">🔗 Connect Data File</button>
     <button class="btn" id="exportBtn" title="Download your own local copy as a .sqlite file">⬇ Export</button>
     <button class="btn" id="importBtn" title="Load a previously exported .sqlite file">⬆ Import</button>
-    <button class="btn" id="exportPublicBtn" title="Download a shareable read-only page — committee info only, no notes">📤 Publish Public Snapshot</button>
     <input type="file" id="import-input" accept=".sqlite,.db,application/x-sqlite3">
   </div>
   <div id="main"><div id="loading">Loading database engine…</div></div>
@@ -523,7 +522,7 @@ else if (typeof exports === 'object'){
 /* Set to the real date/time of the actual edit, every time the app itself (this file) is
    changed and handed off to you to push — shown (with time) near "Welcome" on Home and in the
    sidebar footer, so you can tell at a glance whether GitHub Pages is serving your latest push. */
-const APP_BUILD_DATE = "2026-08-16T01:08:45.000Z";
+const APP_BUILD_DATE = "2026-08-16T01:17:07.000Z";
 
 /* Update this once you've created a suggestions form (Google Forms or Microsoft Forms both work
    fine — a few fields like "Your name (optional)", "Your suggestion", "Which area does this
@@ -706,17 +705,81 @@ const SPECIAL_PAGES = [
 const SPECIAL_PAGE_IDS = SPECIAL_PAGES.map(p=>p.id);
 const specialPageById = Object.fromEntries(SPECIAL_PAGES.map(p=>[p.id,p]));
 
-const PRESIDENT_ELECT_DUTIES = [
-  'To serve, along with the Presiding Officer, President, the Past President, the Secretary, and the Parliamentarian, as an officer of the Bloomington Faculty. (Article III, Section 3.1, Constitution of the Bloomington Faculty)',
-  'To serve as a member of the Executive Committee of the Bloomington Faculty Council.',
-  'To serve as a BFC representative to the University Faculty Council.',
-  'To preside at meetings of the Executive Committee in the absence of the President.',
-  'To preside at meetings of the Bloomington Faculty Council in the absence of the University President, the Provost, and the President.',
-  'To substitute temporarily for the President in the execution of the duties specified in Bylaw 10, when unavoidable circumstances prohibit them from fulfilling those obligations.',
-  'To serve as Chair of the Nomination Committee.',
-  'To be the liaison between the Executive Committee and the standing committees.',
-  'To organize and chair the monthly Policy Committee Chairs meetings, coordinating faculty-led policy work across schools (practice, not separately codified in the Constitution/Bylaws).'
+/* Five officers of the Bloomington Faculty per the Constitution & Bylaws (BL-ACA-D9). President,
+   President-Elect, and Past President rotate together as a three-year cycle (the President-Elect
+   duties list also includes one practice-based item — the Policy Committee Chairs meetings — noted
+   as such since it isn't separately codified). Secretary and Parliamentarian are elected on their
+   own schedule, outside that three-year rotation. holder is left null where no current name could
+   be confirmed via public sources — check the BFC office rather than assuming this is stale. */
+const BFC_OFFICERS = [
+  {
+    role: 'President',
+    holder: 'Heather Akou',
+    term: 'One year (July 1 – June 30); may not serve consecutive terms.',
+    duties: [
+      'To serve, along with the President-Elect, Past President, Secretary, and Parliamentarian, as an officer of the Bloomington Faculty. (Article III, Section 3.1, Constitution of the Bloomington Faculty)',
+      'To serve as Co-Chair of the University Faculty Council.',
+      'To serve as administrator for the Bloomington Faculty Council.',
+      'To preside at meetings of the Bloomington Faculty Council and of the Faculty.',
+      'To report on business left uncompleted from prior meetings.',
+      'To convene search and screen committees when the BFC selects a majority of the committee membership.',
+      'To convene administrative review committees jointly with the Provost.',
+      'To represent Bloomington faculty in meetings with the Board of Trustees and university leadership.'
+    ]
+  },
+  {
+    role: 'President-Elect',
+    holder: 'Amr Sabry',
+    term: 'One year (July 1 – June 30), followed by one year as President, then one year as Past President.',
+    duties: [
+      'To serve, along with the President, Past President, Secretary, and Parliamentarian, as an officer of the Bloomington Faculty. (Article III, Section 3.1, Constitution of the Bloomington Faculty)',
+      'To serve as a member of the Executive Committee of the Bloomington Faculty Council.',
+      'To serve as a BFC representative to the University Faculty Council.',
+      'To preside at meetings of the Executive Committee in the absence of the President.',
+      'To preside at meetings of the Bloomington Faculty Council in the absence of the University President, the Provost, and the President.',
+      'To substitute temporarily for the President in the execution of the President’s duties, when unavoidable circumstances prohibit them from fulfilling those obligations.',
+      'To serve as Chair of the Nomination Committee.',
+      'To be the liaison between the Executive Committee and the standing committees.',
+      'To organize and chair the monthly Policy Committee Chairs meetings, coordinating faculty-led policy work across schools (practice, not separately codified in the Constitution/Bylaws).'
+    ]
+  },
+  {
+    role: 'Past President',
+    holder: 'Bill Ramos',
+    term: 'One year (July 1 – June 30) — the final year of the three-year officer rotation.',
+    duties: [
+      'To serve, along with the President, President-Elect, Secretary, and Parliamentarian, as an officer of the Bloomington Faculty. (Article III, Section 3.1, Constitution of the Bloomington Faculty)',
+      'To serve as Chair of the Long Range Planning Committee.',
+      'To serve as a member of the Executive Committee of the Bloomington Faculty Council.',
+      'To serve as a BFC representative to the University Faculty Council.'
+    ]
+  },
+  {
+    role: 'Secretary',
+    holder: null,
+    term: 'Elected on its own schedule — not part of the President/President-Elect/Past President three-year rotation.',
+    duties: [
+      'To serve, along with the President, President-Elect, Past President, and Parliamentarian, as an officer of the Bloomington Faculty. (Article III, Section 3.1, Constitution of the Bloomington Faculty)',
+      'To keep minutes of the proceedings and actions of the Council.',
+      'To write and circulate executive summaries of each Council meeting, generally within 7 days.',
+      'To serve as a member of the Executive Committee of the Bloomington Faculty Council.'
+    ]
+  },
+  {
+    role: 'Parliamentarian',
+    holder: null,
+    term: 'Elected on its own schedule — not part of the President/President-Elect/Past President three-year rotation.',
+    duties: [
+      'To serve, along with the President, President-Elect, Past President, and Secretary, as an officer of the Bloomington Faculty. (Article III, Section 3.1, Constitution of the Bloomington Faculty)',
+      'To serve as Parliamentarian of the Bloomington Faculty Council.',
+      'To serve as Chair of the Constitution and Rules Committee.',
+      'To serve as a member of the Executive Committee of the Bloomington Faculty Council.',
+      'To preside over the Executive Committee when both the President and President-Elect are absent.',
+      'To substitute for the Secretary when necessary.'
+    ]
+  }
 ];
+const BFC_OFFICER_ROLES = BFC_OFFICERS.map(o=>o.role);
 
 /* ---------------- SQLite engine (sql.js) ---------------- */
 
@@ -1128,144 +1191,6 @@ function exportData(){
   showToast('Exported.');
 }
 
-/* ---------------- Public snapshot export ----------------
-   Generates a standalone, read-only HTML page from the CURRENT live data — committee lists,
-   chair contacts, and the tracked-items lists from the reference pages. Deliberately excludes
-   the Notes on every page: notes are your own working commentary (drafts, caveats, scheduling
-   asides) and were never meant for outside eyes. Re-run "Publish Public Snapshot" any time you
-   want to refresh what's shared; it always reflects your data at that moment, not a fixed date. */
-
-function committeeGroupHtml(title, list){
-  if(!list.length) return '';
-  const rows = list.map(c=>{
-    const chair = getChair(c.id);
-    const upd = lastUpdatedFor(c.id);
-    return `
-      <div class="pub-tile">
-        <div class="pub-tile-head"><span class="pub-badge pub-badge-${c.level.toLowerCase()}">${escapeHtml(LEVEL_LABELS[c.level] || c.level)}</span> <b>${escapeHtml(c.abbr)}</b> — ${escapeHtml(c.name)}</div>
-        <div class="pub-charge">${escapeHtml(c.charge)}</div>
-        <div class="pub-kv">
-          ${chair.chairName ? `<div><b>Chair</b> ${escapeHtml(chair.chairName)}${chair.chairEmail ? ` — <a href="mailto:${cleanEmailList(chair.chairEmail)}">${escapeHtml(chair.chairEmail)}</a>` : ''}</div>` : ''}
-          <div><a href="${c.url}" target="_blank" rel="noopener">Committee page ↗</a></div>
-        </div>
-        ${upd ? `<div class="pub-meta">Updated ${formatDateTime(upd)}</div>` : ''}
-      </div>`;
-  }).join('');
-  return `<section><h2>${escapeHtml(title)}</h2><div class="pub-grid">${rows}</div></section>`;
-}
-
-function generatePublicSnapshotHTML(){
-  const profile = getProfile();
-  const now = new Date().toISOString();
-
-  const bfcLeadership = BFC_COMMITTEES.filter(c=>BFC_LEADERSHIP_IDS.includes(c.id)).map(c=>({...c, level:'BFC'}));
-  const bfcStanding = BFC_COMMITTEES.filter(c=>!BFC_LEADERSHIP_IDS.includes(c.id)).map(c=>({...c, level:'BFC'}));
-  const bfcElected = BFC_ELECTED_COMMITTEES.map(c=>({...c, level:'BFC-ELECTED'}));
-  const ufcExec = UFC_COMMITTEES.filter(c=>UFC_EXEC_IDS.includes(c.id)).map(c=>({...c, level:'UFC'}));
-  const ufcStanding = UFC_COMMITTEES.filter(c=>!UFC_EXEC_IDS.includes(c.id)).map(c=>({...c, level:'UFC'}));
-
-  const committeeSections = [
-    committeeGroupHtml('BFC Leadership Committees', bfcLeadership),
-    committeeGroupHtml('BFC Standing Committees', bfcStanding),
-    committeeGroupHtml('BFC Elected Committees', bfcElected),
-    committeeGroupHtml('UFC Executive Committee', ufcExec),
-    committeeGroupHtml('UFC Standing Committees', ufcStanding)
-  ].join('\n');
-
-  const refSections = SPECIAL_PAGES.map(p=>{
-    const items = p.items.map(it=>
-      `<li>${it.url ? `<a href="${it.url}" target="_blank" rel="noopener">${escapeHtml(it.label)} ↗</a>` : escapeHtml(it.label)}</li>`
-    ).join('');
-    return `
-      <div class="pub-ref-card">
-        <h3>${p.navIcon} ${escapeHtml(p.title)}</h3>
-        <p class="pub-charge">${escapeHtml(p.intro)}</p>
-        <ul class="pub-ref-list">${items}</ul>
-      </div>`;
-  }).join('');
-
-  return `<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Bloomington Faculty Council — Committee &amp; Issues Overview</title>
-<style>
-  :root{--crimson:#990000;--crimson-dark:#7a0000;--cream:#f7f4ee;--ink:#2a2622;--ink-soft:#6b6459;--line:#e4ddd0;--ufc-blue:#1c4e80;}
-  *{box-sizing:border-box;}
-  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;background:var(--cream);color:var(--ink);line-height:1.5;}
-  .wrap{max-width:920px;margin:0 auto;padding:32px 20px 80px;}
-  header{border-bottom:3px solid var(--crimson);padding-bottom:16px;margin-bottom:24px;}
-  header h1{margin:0 0 4px;color:var(--crimson-dark);font-size:26px;}
-  header p{margin:2px 0;color:var(--ink-soft);font-size:14px;}
-  section{margin:30px 0;}
-  section h2{font-size:18px;border-bottom:1px solid var(--line);padding-bottom:6px;margin-bottom:14px;}
-  .pub-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;}
-  .pub-tile{border:1px solid var(--line);border-radius:10px;padding:14px;background:#fff;}
-  .pub-tile-head{font-size:14px;margin-bottom:6px;}
-  .pub-badge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;letter-spacing:.03em;background:#eee;color:#555;}
-  .pub-badge-bfc{background:#f5dede;color:var(--crimson-dark);}
-  .pub-badge-ufc{background:#dbe6f2;color:var(--ufc-blue);}
-  .pub-badge-bfc-elected{background:#fbe9c8;color:#8a5a00;}
-  .pub-charge{font-size:13px;color:var(--ink-soft);margin:6px 0;}
-  .pub-kv{font-size:12.5px;margin-top:8px;}
-  .pub-kv div{margin-bottom:3px;}
-  .pub-kv a{color:var(--ufc-blue);}
-  .pub-meta{font-size:11px;color:var(--ink-soft);margin-top:8px;}
-  .pub-ref-card{border:1px solid var(--line);border-radius:10px;padding:16px;background:#fff;margin-bottom:14px;}
-  .pub-ref-card h3{margin:0 0 6px;font-size:15px;}
-  .pub-ref-list{list-style:none;margin:10px 0 0;padding:0;}
-  .pub-ref-list li{padding:8px 11px;border:1px solid var(--line);border-radius:8px;margin-bottom:7px;font-size:13px;background:var(--cream);}
-  .pub-ref-list a{color:var(--ufc-blue);font-weight:600;text-decoration:none;}
-  .pub-ref-list a:hover{text-decoration:underline;}
-  .suggest-box{border:2px solid var(--crimson);border-radius:12px;padding:20px;background:#fff;text-align:center;}
-  .suggest-box h2{border:none;margin-top:0;}
-  .btn-primary{display:inline-block;background:var(--crimson);color:#fff;text-decoration:none;font-weight:700;padding:10px 22px;border-radius:8px;font-size:14px;margin-top:8px;}
-  .btn-primary:hover{background:var(--crimson-dark);}
-  footer{margin-top:50px;padding-top:16px;border-top:1px solid var(--line);font-size:12px;color:var(--ink-soft);}
-</style>
-</head>
-<body>
-<div class="wrap">
-  <header>
-    <h1>Bloomington Faculty Council</h1>
-    <p>Committee &amp; Issues Overview</p>
-    <p>Maintained by ${escapeHtml(profile.name)}, ${escapeHtml(profile.role)} · ${escapeHtml(profile.org)}</p>
-    <p>Published ${formatDateTime(now)}</p>
-  </header>
-
-  <div class="suggest-box">
-    <h2>Have a suggestion for the BFC?</h2>
-    <p>Tell us what you think the BFC officers or committees should be working on.</p>
-    <a class="btn-primary" href="${SUGGESTIONS_FORM_URL}" target="_blank" rel="noopener">Submit a suggestion ↗</a>
-  </div>
-
-  ${committeeSections}
-
-  <section>
-    <h2>Tracked Issues &amp; Policies</h2>
-    ${refSections}
-  </section>
-
-  <footer>
-    This is a point-in-time snapshot published from the BFC Hub app — it reflects the data as of the "Published" date above, not a live feed. Check back after the next publish for anything newer.
-  </footer>
-</div>
-</body>
-</html>`;
-}
-
-function exportPublicSnapshot(){
-  const html = generatePublicSnapshotHTML();
-  const blob = new Blob([html], {type:'text/html'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `bfc-hub-public-${new Date().toISOString().slice(0,10)}.html`;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  showToast('Public snapshot downloaded — rename to whatever your public page should be called and push it.');
-}
 function importDataFile(file){
   const reader = new FileReader();
   reader.onload = e=>{
@@ -1527,8 +1452,6 @@ function renderHome(){
     </div>`;
   }).join('');
 
-  const dutiesList = PRESIDENT_ELECT_DUTIES.map(d=>`<li>${escapeHtml(d)}</li>`).join('');
-
   const profile = getProfile();
   const globalUpd = globalLastUpdated();
 
@@ -1539,6 +1462,12 @@ function renderHome(){
       <p class="note-small" style="margin:-8px 0 6px;">App updated ${appBuildLabel()}</p>
 
       ${fileNote}
+
+      <div class="card" style="border:2px solid var(--crimson);background:#fff8f6;">
+        <h2>💬 Suggest something for the BFC officers to work on</h2>
+        <p class="charge" style="margin-top:-4px;">Have an idea, concern, or issue you think BFC leadership should take up? Submit it — name optional.</p>
+        <a class="btn-primary btn" href="${SUGGESTIONS_FORM_URL}" target="_blank" rel="noopener">Submit a suggestion ↗</a>
+      </div>
 
       <div class="stat-row">
         <div class="stat"><div class="num">${total}</div><div class="lbl">Committees tracked</div></div>
@@ -1556,7 +1485,10 @@ function renderHome(){
           </div>
           <div>
             <label>Role</label>
-            <input type="text" id="profRole" value="${escapeHtml(profile.role)}" placeholder="e.g., President-Elect, President, Past President">
+            <select id="profRole">
+              ${BFC_OFFICER_ROLES.map(r=>`<option value="${escapeHtml(r)}" ${r===profile.role?'selected':''}>${escapeHtml(r)}</option>`).join('')}
+              ${BFC_OFFICER_ROLES.includes(profile.role) ? '' : `<option value="${escapeHtml(profile.role)}" selected>${escapeHtml(profile.role)} (custom)</option>`}
+            </select>
           </div>
         </div>
         <div class="row">
@@ -1569,7 +1501,7 @@ function renderHome(){
             <input type="text" id="profTerm" value="${escapeHtml(profile.termLabel)}" placeholder="e.g., 2026 – 2029">
           </div>
         </div>
-        <div class="note-small">This appears in the sidebar and in the signature of every email this app drafts. Update it as your role changes year to year (President-Elect → President → Past President), or if someone else ever takes this app over.</div>
+        <div class="note-small">This appears in the sidebar and in the signature of every email this app drafts. Update it as your role changes year to year, or if someone else uses their own local copy of this app.</div>
       </div>
 
       <div class="card">
@@ -1605,11 +1537,18 @@ function renderHome(){
       <div class="grid-section-label">Agenda &amp; Coordination</div>
       <div class="grid">${refTiles}</div>
 
-      <details class="card" style="margin-top:26px;">
-        <summary style="cursor:pointer;font-weight:700;font-size:15px;">President-Elect Duties (Reference)</summary>
-        <ul class="ref-list" style="margin-top:12px;">${dutiesList}</ul>
-        <div class="note-small">Mostly from the Constitution and Bylaws of the Bloomington Faculty, plus one practice-based duty noted as such. Kept here for reference regardless of who currently holds the role — update "Your Profile" above as roles rotate.</div>
-      </details>
+      <div class="grid-section-label" style="margin-top:26px;">BFC Officers (Reference)</div>
+      <div class="note-small" style="margin:-4px 0 10px;">Duties drawn from the Constitution and Bylaws of the Bloomington Faculty (BL-ACA-D9). President, President-Elect, and Past President rotate together on a three-year cycle; Secretary and Parliamentarian are elected on their own schedule. Kept here for reference regardless of who currently holds each role — update "Your Profile" above as your own role rotates.</div>
+      ${BFC_OFFICERS.map(o=>{
+        const isCurrent = o.role === profile.role;
+        const dutiesLi = o.duties.map(d=>`<li>${escapeHtml(d)}</li>`).join('');
+        return `
+        <details class="card" style="margin-top:10px;" ${isCurrent?'open':''}>
+          <summary style="cursor:pointer;font-weight:700;font-size:15px;">${escapeHtml(o.role)}${isCurrent?' — your current role':''} <span style="font-weight:400;color:var(--ink-soft);">${o.holder?'· '+escapeHtml(o.holder):'· not publicly listed — confirm with the BFC office'}</span></summary>
+          <div class="note-small" style="margin:8px 0 4px;">${escapeHtml(o.term)}</div>
+          <ul class="ref-list" style="margin-top:8px;">${dutiesLi}</ul>
+        </details>`;
+      }).join('')}
     </div>
   `;
 }
@@ -1622,7 +1561,16 @@ function attachHomeListeners(){
   const profRole = document.getElementById('profRole');
   const profOrg = document.getElementById('profOrg');
   const profTerm = document.getElementById('profTerm');
-  [profName, profRole, profOrg, profTerm].forEach(el=>{
+  profRole.addEventListener('change', ()=>{
+    setSetting('profile_name', profName.value);
+    setSetting('profile_role', profRole.value);
+    setSetting('profile_org', profOrg.value);
+    setSetting('profile_term', profTerm.value);
+    updateBrandSub();
+    debouncedSave();
+    renderMain(); // role change reshuffles which officer card opens & the charge line above
+  });
+  [profName, profOrg, profTerm].forEach(el=>{
     el.addEventListener('input', ()=>{
       setSetting('profile_name', profName.value);
       setSetting('profile_role', profRole.value);
@@ -1883,7 +1831,6 @@ document.getElementById('search').addEventListener('input', (e)=>{
 });
 document.getElementById('connectBtn').addEventListener('click', connectDataFile);
 document.getElementById('exportBtn').addEventListener('click', exportData);
-document.getElementById('exportPublicBtn').addEventListener('click', exportPublicSnapshot);
 document.getElementById('importBtn').addEventListener('click', ()=> document.getElementById('import-input').click());
 document.getElementById('import-input').addEventListener('change', (e)=>{
   const f = e.target.files[0];
