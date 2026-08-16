@@ -522,7 +522,7 @@ else if (typeof exports === 'object'){
 /* Set to the real date/time of the actual edit, every time the app itself (this file) is
    changed and handed off to you to push — shown (with time) near "Welcome" on Home and in the
    sidebar footer, so you can tell at a glance whether GitHub Pages is serving your latest push. */
-const APP_BUILD_DATE = "2026-08-16T01:17:07.000Z";
+const APP_BUILD_DATE = "2026-08-16T01:35:29.000Z";
 
 /* Update this once you've created a suggestions form (Google Forms or Microsoft Forms both work
    fine — a few fields like "Your name (optional)", "Your suggestion", "Which area does this
@@ -1065,11 +1065,12 @@ async function tryReconnectFile(){
     // Try the passive check first (never prompts, never needs a click).
     let perm = await handle.queryPermission({mode:'readwrite'});
     if(perm !== 'granted'){
-      // If you picked "Allow on every visit" when you first connected this file,
-      // Chrome remembers that indefinitely — but only requestPermission() (not
-      // queryPermission()) actually redeems it. When access wasn't persisted,
-      // this call needs a click to show UI, so on an unattended page load it
-      // just resolves without granting anything — safe either way.
+      // If this app is installed (Add to Home Screen / Install), Chrome persists
+      // file permission indefinitely and queryPermission() above already returned
+      // 'granted' — this branch is only reached for non-installed use, where Chrome
+      // may need a fresh requestPermission() call to redeem it. That needs a user
+      // gesture to show UI, so on an unattended page load it just resolves without
+      // granting anything — safe either way; the UI falls back to "Reconnect".
       try{ perm = await handle.requestPermission({mode:'readwrite'}); }catch(e){ /* needs a user gesture; ignore */ }
     }
     if(perm === 'granted'){
@@ -1417,7 +1418,7 @@ function renderHome(){
   const withNotes = committeesWithNotesCount();
 
   const fileNote = fsApiSupported
-    ? `<div class="banner info">💾 For permanent local storage, click <b>&nbsp;Connect Data File&nbsp;</b> above. A file picker opens — choose an existing <code>bfc-hub-data.sqlite</code> to resume it, or cancel that dialog to create a new one (e.g. in Documents). This app then autosaves directly to that file on every change. When the browser asks about future access, choose <b>"Allow on every visit"</b> rather than "Allow this time" — that lets it reconnect automatically on reload without asking again. If you pick "Allow this time" (or close the browser entirely), you may need to click "Reconnect Data File" occasionally — that's just a one-click permission confirmation, not re-picking the file.</div>`
+    ? `<div class="banner info">💾 For permanent local storage, click <b>&nbsp;Connect Data File&nbsp;</b> above. A file picker opens — choose an existing <code>bfc-hub-data.sqlite</code> to resume it, or cancel that dialog to create a new one (e.g. in Documents). This app then autosaves directly to that file on every change — picking or creating the file is the only permission step; nothing further to click through. Occasionally, after closing and reopening the browser, it may need one quick reconfirmation — if the status bar above shows a warning, just click <b>"Reconnect Data File"</b>, which is a one-click confirmation, not re-picking the file. Installing this app (browser menu → Install / Add to Home Screen) skips that step entirely going forward.</div>`
     : `<div class="banner">⚠ This browser doesn't support direct-to-disk saving. Open this file in <b>Chrome</b> or <b>Edge</b> for automatic local saving, or use <b>Export</b> / <b>Import</b> each session to carry your data forward.</div>`;
 
   function tileFor(c){
