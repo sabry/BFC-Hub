@@ -523,13 +523,13 @@ else if (typeof exports === 'object'){
 /* Set to the real date/time of the actual edit, every time the app itself (this file) is
    changed and handed off to you to push — shown (with time) near "Welcome" on Home and in the
    sidebar footer, so you can tell at a glance whether GitHub Pages is serving your latest push. */
-const APP_BUILD_DATE = "2026-08-16T00:31:53.000Z";
+const APP_BUILD_DATE = "2026-08-16T00:48:04.000Z";
 
 /* Update this once you've created a suggestions form (Google Forms or Microsoft Forms both work
    fine — a few fields like "Your name (optional)", "Your suggestion", "Which area does this
    relate to?"). The public snapshot page links to whatever URL is here, so this is the only line
    you need to touch to wire it in. */
-const SUGGESTIONS_FORM_URL = "https://forms.gle/REPLACE-WITH-YOUR-FORM-LINK";
+const SUGGESTIONS_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLScbpSM8EhL8wI_kiPesxciLDpSMrWsFrnsoE1LQDl8XFKzRqw/viewform";
 
 const DEFAULT_PROFILE = {
   name: "Amr Sabry",
@@ -583,36 +583,8 @@ const SEED_NOTES = [
   {id:'ufc-oe',    body:"Research note (Aug 2026): Online Education runs as a subcommittee under UFC Academic Affairs rather than a standalone committee. No confirmed public email was found for co-chair Natalia Rybas (IU East)."},
   {id:'ufc-sa',    body:"Research note (Aug 2026): no chair is publicly listed for this committee on the UFC site — ask the UFC office or a fellow UFC representative."},
   {id:'ufc-tp',    body:"Research note (Aug 2026): no chair is publicly listed for this committee on the UFC site — ask the UFC office or a fellow UFC representative."},
-  {id:'bfc-fmrc',  body:"⚠ Research note (Aug 2026): the Elected Committees page lists this chair as \"Seda Durguner (Kelley School of Business)\", but Kelley's faculty directory has two very similarly-named Clinical Associate Professors of Finance — \"Seda Durguner\" and \"Sena Durguner\" — and neither public profile lists an email address. No email has been seeded here; please confirm the correct person and email with the BFC office before relying on this contact."},
-  {id:'policy-chairs', body:`Draft invitation email (Aug 2026, sent under Heather Akou's name — check with Virginia/Heather before reusing verbatim):
-
-Subject: Invitation — Monthly Policy Committee Chairs Meetings
-
-Heather Akou, president of the Bloomington Faculty Council, invites you to attend the monthly Policy Committee Chairs meetings at Wells House.
-
-These meetings provide a forum for Policy Committee Chairs to compare policy developments across schools, coordinate faculty-led policy work within their units, and bring common concerns to the Bloomington Faculty Council and campus and university policy processes. Their purpose is to strengthen the faculty's capacity to shape school-level policy and to coordinate a strong faculty response when campus or university actions affect teaching, research, tenure, academic freedom, or unit governance.
-
-In the past two years, meetings have addressed SEA 202 and post-tenure review, both of which have significant consequences for faculty and for school-level policies and procedures. This year's priorities will be developed collectively by the participating chairs, beginning at the first meeting, and will continue to evolve in response to concerns raised by faculty across the campus.
-
-Possible areas for collective work include:
-
-- Developing and sharing faculty-led models for syllabus guidance concerning generative AI. Such guidance should help students understand what is permitted while preserving instructor judgment and disciplinary differences. Models could address courses that minimize AI use, incorporate it centrally, or permit limited use with appropriate acknowledgment and disclosure.
-
-- Reviewing new or revised university policies, identifying their implications for school- and department-level policies and practices, and coordinating recommendations or responses that protect peer review, due process, academic freedom, and faculty governance.
-
-- Examining proposed program changes, reorganizations, mergers, or closures through the appropriate school governance processes.
-
-These examples are not intended to determine or limit the agenda. Policy Committee Chairs are encouraged to bring forward matters requiring collective attention throughout the year. Any resulting policy proposals, model language, or recommendations would be considered through the appropriate school, department, or campus governance process.
-
-The meetings are intended principally as a forum for Policy Committee Chairs. If you cannot attend, please designate a faculty representative to participate in your place. Deans are welcome, although their attendance is not required.
-
-We will use Microsoft Teams for communication and document sharing. A remote participation option will also be available for each meeting.
-
-Thank you for contributing to strong and independent faculty governance within our schools and across the Bloomington campus.
-
-—
-
-Scheduling note: the BTAA conference (Dec 3–5) overlaps one monthly meeting — may need to reschedule that session or find someone to fill in.`},
+  {id:'bfc-fmrc',  body:"Research note (Aug 2026): the chair name listed for this committee couldn't be fully confirmed against the public directory — please verify the correct person and email with the BFC office before relying on this contact."},
+  {id:'policy-chairs', body:"Note: the invitation email for these meetings is drafted separately (not stored here) — check with Virginia/Heather for the current version before sending. Scheduling note: the BTAA conference (Dec 3–5) overlaps one monthly meeting — may need to reschedule that session or find someone to fill in."},
   {id:'coordination', body:"Research note (Aug 2026): under 2025 state legislation and Board of Trustees policy BOT-02 (\"Establishing University Policies\"), BFC/UFC resolutions are advisory only, and university policy approval runs through the system-wide Policy Executive Committee (PEC) — faculty hold only 3 of roughly 13 voting seats (the three UFC campus co-chairs; the BFC President becomes a UFC co-chair and PEC member during their presidential year). PEC does not hold public meetings; public/faculty comment on policy changes is limited to a 10-day window via policies.iu.edu (submissions to policies@iu.edu). Sources: IU policy BOT-02 (policies.iu.edu) and Indiana Daily Student reporting, Nov. 2025."},
   {id:'bot-policies', body:"Research note (Aug 2026): the Policy Alignment Initiative's main tranche (26 university-level policies) appears largely complete as of the Aug 14, 2026 BOT-34 approval — policies.iu.edu/under-review/index.html showed nothing actively open for comment as of this check. The IU Bloomington AAUP chapter's own tracker (iubaaup.org) separately lists ACA-17 (Faculty Board of Review Uniform Standards), HR-06-80 (Remote Work), and HR-04-30 (Employee Benefit Plans) as under review, but with Feb–Apr 2026 submission dates that may now be stale — their current status is unconfirmed. This whole list is dynamic; recheck policies.iu.edu directly (it loads its under-review list dynamically, so an automated check can miss recent postings)."},
   {id:'state-national', body:"Research note (Aug 2026): this list reflects what's publicly confirmed as of this check; Indiana's legislature runs annual sessions (short/budget session in even years, ~Jan–Mar), so new bills should be expected each session and this needs periodic re-review. Interim study committee topics for the 2027 session weren't confirmable via automated search as of Aug 2026 — check iga.in.gov/2026/committees/interim directly for the current list, especially anything following up on SEA 199's low-enrollment-program review (final list due 2027)."}
