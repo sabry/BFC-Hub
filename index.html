@@ -305,7 +305,7 @@
   <div id="search-wrap"><input id="search" type="text" placeholder="Search committees..."></div>
   <div id="filters"></div>
   <div id="nav"></div>
-  <div id="sidebar-foot">Indiana University Bloomington<br><span id="app-build">App updated —</span></div>
+  <div id="sidebar-foot">Unofficial faculty governance reference tool<br><span id="app-build">App updated —</span></div>
 </div>
 
 <div id="main-col">
@@ -522,7 +522,7 @@ else if (typeof exports === 'object'){
 /* Set to the real date/time of the actual edit, every time the app itself (this file) is
    changed and handed off to you to push — shown (with time) near "Welcome" on Home and in the
    sidebar footer, so you can tell at a glance whether GitHub Pages is serving your latest push. */
-const APP_BUILD_DATE = "2026-08-16T09:48:43.000Z";
+const APP_BUILD_DATE = "2026-08-16T10:38:48.000Z";
 
 /* Update this once you've created a suggestions form (Google Forms or Microsoft Forms both work
    fine — a few fields like "Your name (optional)", "Your suggestion", "Which area does this
@@ -556,17 +556,17 @@ const SEED_CHAIRS = [
   {id:'bfc-lrpc',   name:'Bill Ramos (BFC Past President)',                  email:'wramos@iu.edu'},
   {id:'bfc-nomcom', name:'Amr Sabry (BFC President-Elect)',                  email:'sabry@iu.edu'},
   {id:'bfc-rac',    name:'Daniel Kearns, Katie Siek',                        email:'dbkearns@iu.edu, ksiek@iu.edu'},
-  {id:'bfc-sac',    name:'Heather Eastman-Mueller, Catherine Sherwood-Laughlin, Joe Varga', email:'heastman@iu.edu, csherwoo@iu.edu'},
-  {id:'bfc-saaac',  name:'Spencer Hall, Matthew Jackson',                    email:'sprhall@iu.edu'},
+  {id:'bfc-sac',    name:'Heather Eastman-Mueller, Catherine Sherwood-Laughlin, Joe Varga', email:'heastman@iu.edu, csherwoo@iu.edu, jjvarga@iu.edu'},
+  {id:'bfc-saaac',  name:'Spencer Hall, Matthew Jackson',                    email:'sprhall@iu.edu, mj153@iu.edu'},
   {id:'bfc-tpc',    name:'Alexander Alexeev, Jeremy Siek',                   email:'aalexeev@iu.edu, jsiek@iu.edu'},
-  {id:'ufc-aa',     name:'Chad Lochmiller, Krista Hoffmann-Longtin, Tanya Perkins', email:'clochmil@iu.edu, talperk@iu.edu'},
+  {id:'ufc-aa',     name:'Chad Lochmiller, Krista Hoffmann-Longtin, Tanya Perkins', email:'clochmil@iu.edu, klongtin@iu.edu, talperk@iu.edu'},
   {id:'ufc-ba',     name:'Mark Baer, Ann Holmes',                            email:'mcbaer@iu.edu, aholmes@iu.edu'},
   {id:'ufc-ec',     name:'Heather Akou, Kathy Marrs, Alan Krabbenhoft',      email:'hakou@iu.edu, kmarrs@iu.edu, agkrabbe@iu.edu'},
-  {id:'ufc-oe',     name:'Shawn Nichols-Boyle, Natalia Rybas',               email:'sfnichol@iu.edu'},
+  {id:'ufc-oe',     name:'Shawn Nichols-Boyle, Natalia Rybas',               email:'sfnichol@iu.edu, natrybas@iu.edu'},
   /* ufc-fa, ufc-ra, ufc-hd, ufc-sa, ufc-tp: no chair publicly listed as of the seed date — see the seeded note on each page. */
   {id:'bfc-fmc',    name:'Katie Metz',                                       email:'kmetz@iu.edu'},
   {id:'bfc-fbor',   name:'David McDonald',                                   email:'davmcdon@iu.edu'},
-  {id:'bfc-fmrc',   name:'Seda Durguner',                                    email:''},
+  {id:'bfc-fmrc',   name:'Seda Durguner',                                    email:'sdurgune@iu.edu'},
   {id:'bfc-saabor', name:'Spencer Hall',                                     email:'sprhall@iu.edu'},
   {id:'bfc-ac',     name:'Rebecca Butters',                                  email:'rebutter@iu.edu'}
 ];
@@ -579,21 +579,16 @@ const SEED_CHAIRS = [
    MigrateRemoveLegacySeedNotes() below cleans the old seeded rows out of any database (yours or
    anyone else's) that already picked them up before this fix. */
 const CHAIR_CAVEATS = {
-  'bfc-epc':   "Connie Cook's public directory email (cglen@iu.edu) has a username that doesn't match her surname — worth a quick verification before relying on it for official correspondence.",
-  'bfc-sac':   "No public directory email could be confirmed for co-chair Joe Varga (School of Social Work). Ask the BFC office or a fellow committee member for his current contact.",
-  'bfc-saaac': "No public directory email could be confirmed for co-chair Matthew Jackson (GPSG-SAA representative, likely a graduate student). Ask the BFC office for his current contact.",
-  'ufc-aa':    "UFC's page for this committee was still showing what appears to be the 2025-2026 roster as of last check; the 2026-2027 rollover may not be posted yet. Verify chair names before relying on them. Also, no confirmed public email was found for co-chair Krista Hoffmann-Longtin.",
+  'ufc-aa':    "UFC's page for this committee was still showing what appears to be the 2025-2026 roster as of last check; the 2026-2027 rollover may not be posted yet. Verify chair names before relying on them.",
   'ufc-ba':    "UFC's page for this committee showed a stale roster with terms listed as 2023-2025 as of last check. The chair names/emails here may be outdated — verify with the UFC office before relying on them.",
   'ufc-fa':    "No chair is publicly listed for this committee. Per UFC Bylaws, the committee selects its own chair internally — ask the UFC office or a fellow UFC representative who currently holds that role.",
   'ufc-ra':    "No chair is publicly listed. The committee is described as co-chaired by a nominee from each of the IU Indianapolis and IU Bloomington research affairs committees, but current names weren't published — ask the UFC office.",
   'ufc-hd':    "No chair is publicly listed. Per policy ACA-62 the chair is selected by the UFC Executive Committee — ask the UFC office for the current holder.",
-  'ufc-oe':    "Online Education runs as a subcommittee under UFC Academic Affairs rather than a standalone committee. No confirmed public email was found for co-chair Natalia Rybas (IU East).",
   'ufc-sa':    "No chair is publicly listed for this committee on the UFC site — ask the UFC office or a fellow UFC representative.",
-  'ufc-tp':    "No chair is publicly listed for this committee on the UFC site — ask the UFC office or a fellow UFC representative.",
-  'bfc-fmrc':  "The chair name listed for this committee couldn't be fully confirmed against the public directory — please verify the correct person and email with the BFC office before relying on this contact."
+  'ufc-tp':    "No chair is publicly listed for this committee on the UFC site — ask the UFC office or a fellow UFC representative."
 };
 const SPECIAL_PAGE_BACKGROUND = {
-  'policy-chairs': "The invitation email for these meetings is drafted separately (not stored here) — check with Virginia/Heather for the current version before sending. Scheduling note: the BTAA conference (Dec 3–5) overlaps one monthly meeting — may need to reschedule that session or find someone to fill in.",
+  'policy-chairs': "Scheduling note: the BTAA conference (Dec 3–5) overlaps one monthly meeting — may need to reschedule that session or find someone to fill in.",
   'coordination': "Under 2025 state legislation and Board of Trustees policy BOT-02 (\"Establishing University Policies\"), BFC/UFC resolutions are advisory only, and university policy approval runs through the system-wide Policy Executive Committee (PEC) — faculty hold only 3 of roughly 13 voting seats (the three UFC campus co-chairs; the BFC President becomes a UFC co-chair and PEC member during their presidential year). PEC does not hold public meetings; public/faculty comment on policy changes is limited to a 10-day window via policies.iu.edu (submissions to policies@iu.edu). Sources: IU policy BOT-02 (policies.iu.edu) and Indiana Daily Student reporting, Nov. 2025.",
   'bot-policies': "The Policy Alignment Initiative's main tranche (26 university-level policies) appears largely complete as of the Aug 14, 2026 BOT-34 approval — policies.iu.edu/under-review/index.html showed nothing actively open for comment as of last check. The IU Bloomington AAUP chapter's own tracker (iubaaup.org) separately lists ACA-17 (Faculty Board of Review Uniform Standards), HR-06-80 (Remote Work), and HR-04-30 (Employee Benefit Plans) as under review, but with Feb–Apr 2026 submission dates that may now be stale — their current status is unconfirmed. This whole list is dynamic; recheck policies.iu.edu directly (it loads its under-review list dynamically, so an automated check can miss recent postings).",
   'state-national': "This list reflects what's publicly confirmed as of last check; Indiana's legislature runs annual sessions (short/budget session in even years, ~Jan–Mar), so new bills should be expected each session and this needs periodic re-review. Interim study committee topics for the 2027 session weren't confirmable via automated search as of Aug 2026 — check iga.in.gov/2026/committees/interim directly for the current list, especially anything following up on SEA 199's low-enrollment-program review (final list due 2027)."
@@ -752,7 +747,7 @@ const SPECIAL_PAGES = [
   ]},
   {id:'iub-issues', navIcon:'🏫', navLabel:'IUB Issues', title:'IUB Issues', intro:'Campus-level issues and initiatives being tracked this term.', items:[
     {label:'Spread 10-month contracts over 12 months'},
-    {label:'Create a "Muslim Philanthropy Initiative"'},
+    {label:'Muslim Philanthropy Initiative (IU Indianapolis) — need to figure out what this is all about', url:'https://www.idsnews.com/article/2026/04/iu-indianapolis-muslim-philanthropy-intiative-indiana-lawmakers-letter-hamas'},
     {label:'Clarify who can vote on PT cases and guidelines for external reviewers', url:'https://vpfaa.indiana.edu/policies/bl-aca-e1-promotion-tenure-principles-policies/index.html'}
   ]},
   {id:'state-national', navIcon:'🏛️', navLabel:'State / National Issues', title:'State / National Issues', intro:'State legislation and federal/national developments outside IU Bloomington that affect the faculty.', items:[
@@ -889,7 +884,27 @@ function ensureSchema(){
   );`);
   migrateOldSeedTimestamp();
   migrateRemoveLegacySeedNotes();
+  migrateChairEmailCorrections();
   seedDefaults();
+}
+
+// One-time fix: a handful of chair emails were confirmed/corrected after the initial seed
+// (Joe Varga, Matthew Jackson, Krista Hoffmann-Longtin, Natalia Rybas, Seda Durguner). Since
+// SEED_CHAIRS uses INSERT OR IGNORE, editing that constant only affects brand-new databases —
+// a device that already seeded the old (incomplete/blank) values needs this explicit rewrite.
+// Only updates rows that still hold the exact old value, so anything you've since edited
+// yourself by hand is left alone. Safe to run on every load — once migrated, nothing matches.
+function migrateChairEmailCorrections(){
+  const CORRECTIONS = [
+    {id:'bfc-sac',   oldEmail:'heastman@iu.edu, csherwoo@iu.edu',        newEmail:'heastman@iu.edu, csherwoo@iu.edu, jjvarga@iu.edu'},
+    {id:'bfc-saaac', oldEmail:'sprhall@iu.edu',                          newEmail:'sprhall@iu.edu, mj153@iu.edu'},
+    {id:'ufc-aa',    oldEmail:'clochmil@iu.edu, talperk@iu.edu',         newEmail:'clochmil@iu.edu, klongtin@iu.edu, talperk@iu.edu'},
+    {id:'ufc-oe',    oldEmail:'sfnichol@iu.edu',                         newEmail:'sfnichol@iu.edu, natrybas@iu.edu'},
+    {id:'bfc-fmrc',  oldEmail:'',                                        newEmail:'sdurgune@iu.edu'}
+  ];
+  CORRECTIONS.forEach(c=>{
+    db.run(`UPDATE committees SET chair_email = ? WHERE id = ? AND chair_email = ?`, [c.newEmail, c.id, c.oldEmail]);
+  });
 }
 
 // One-time cleanup: this app used to pre-seed the private "Notes" table with shared research
@@ -1330,8 +1345,7 @@ const FILTERS = [
   {key:'all',    label:'All'},
   {key:'bfc',    label:'BFC only'},
   {key:'ufc',    label:'UFC only'},
-  {key:'notes',  label:'Has notes'},
-  {key:'nochair',label:'No chair email'}
+  {key:'notes',  label:'Has notes'}
 ];
 
 function matchesFilter(c, level){
@@ -1339,7 +1353,6 @@ function matchesFilter(c, level){
     case 'bfc': return level === 'BFC' || level === 'BFC-ELECTED';
     case 'ufc': return level === 'UFC';
     case 'notes': return noteCount(c.id) > 0;
-    case 'nochair': return !getChair(c.id).chairEmail;
     default: return true;
   }
 }
@@ -1716,20 +1729,20 @@ function renderBfcWide(){
   return `
     <div class="page">
       <div class="page-head"><h1>BFC-Wide Channel</h1></div>
-      <p class="charge">Reach the full BFC membership. IU does not publish a direct all-member listserv, so messages are routed through the BFC office for distribution to the council.</p>
+      <p class="charge">Reach the BFC office — including, but not limited to, getting a message to the full Council. IU does not publish a direct all-member listserv, so broad messages are routed through the office.</p>
       ${upd ? `<div class="note-small" style="margin:-14px 0 20px;">Last updated ${formatDateTime(upd)}</div>` : ''}
 
       <div class="card">
-        <h2>Contact All BFC Members</h2>
+        <h2>Contact the BFC Office</h2>
         <div class="kv">
           <div><b>Via</b> ${escapeHtml(BFC_OFFICE.director)}</div>
           <div><b>Email</b> ${BFC_OFFICE.email}</div>
           <div><b>Phone</b> ${BFC_OFFICE.phone}</div>
         </div>
         <div class="actions">
-          <button class="btn-primary btn" id="emailAllBtn">✉ Email BFC Office (for Council distribution)</button>
+          <button class="btn-primary btn" id="emailAllBtn">✉ Email BFC Office</button>
         </div>
-        <div class="note-small">Opens a pre-filled email asking the office to forward your message to the full Council. Edit the draft in your mail app before sending.</div>
+        <div class="note-small">Opens your mail app addressed to the office — write whatever you need.</div>
       </div>
 
       ${renderNotesSection(BFCWIDE_ID, 'Talking points, term goals, running notes for the full council...')}
@@ -1739,10 +1752,7 @@ function renderBfcWide(){
 
 function attachBfcWideExtras(){
   document.getElementById('emailAllBtn').addEventListener('click', ()=>{
-    const profile = getProfile();
-    const subject = encodeURIComponent('Message for BFC Council distribution');
-    const body = encodeURIComponent(`Hello ${BFC_OFFICE.director.split(',')[0]},\n\nCould you please distribute the following message to the BFC Council?\n\n---\n[Your message here]\n---\n\nThank you,\n${profile.name}\n${profile.role}, ${profile.org}`);
-    window.location.href = `mailto:${cleanEmailList(BFC_OFFICE.email)}?subject=${subject}&body=${body}`;
+    window.location.href = `mailto:${cleanEmailList(BFC_OFFICE.email)}`;
   });
 }
 
