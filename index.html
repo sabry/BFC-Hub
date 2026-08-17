@@ -633,7 +633,7 @@ else if (typeof exports === 'object'){
 /* Set to the real date/time of the actual edit, every time the app itself (this file) is
    changed and handed off to you to push — shown (with time) near "Welcome" on Home and in the
    sidebar footer, so you can tell at a glance whether GitHub Pages is serving your latest push. */
-const APP_BUILD_DATE = "2026-08-17T17:00:34.000Z";
+const APP_BUILD_DATE = "2026-08-17T17:21:08.000Z";
 
 /* Update this once you've created a suggestions form (Google Forms or Microsoft Forms both work
    fine — a few fields like "Your name (optional)", "Your suggestion", "Which area does this
@@ -1737,8 +1737,8 @@ function renderMain(){
   const main = document.getElementById('main');
   if(currentTab==='home'){ main.innerHTML = renderHome(); attachHomeListeners(); return; }
   if(currentTab===TODOS_ID){ main.innerHTML = renderTodos(); attachTodoListeners(); return; }
-  if(currentTab===GENERAL_NOTES_ID){ main.innerHTML = renderGeneralNotes(); attachNotesListeners(GENERAL_NOTES_ID); return; }
-  if(currentTab==='bfcwide'){ main.innerHTML = renderBfcWide(); attachNotesListeners(BFCWIDE_ID); attachBfcWideExtras(); return; }
+  if(currentTab===GENERAL_NOTES_ID){ main.innerHTML = renderGeneralNotes(); attachTrackedItemListeners(GENERAL_NOTES_ID); attachNotesListeners(GENERAL_NOTES_ID); return; }
+  if(currentTab==='bfcwide'){ main.innerHTML = renderBfcWide(); attachTrackedItemListeners(BFCWIDE_ID); attachNotesListeners(BFCWIDE_ID); attachBfcWideExtras(); return; }
   if(SPECIAL_PAGE_IDS.includes(currentTab)){
     const p = specialPageById[currentTab];
     main.innerHTML = renderSpecialPage(p);
@@ -1750,6 +1750,7 @@ function renderMain(){
   if(!c){ main.innerHTML = '<p>Not found.</p>'; return; }
   main.innerHTML = renderCommittee(c);
   attachCommitteeListeners(c);
+  attachTrackedItemListeners(c.id);
   attachNotesListeners(c.id);
 }
 
@@ -1969,6 +1970,8 @@ function renderCommittee(c){
         ${CHAIR_CAVEATS[c.id] ? `<div class="note-small" style="margin-top:6px;">ℹ️ ${escapeHtml(CHAIR_CAVEATS[c.id])}</div>` : ''}
       </div>
 
+      ${renderTrackedItemsSection(c.id)}
+
       ${renderNotesSection(c.id, `Notes, action items, meeting summaries for ${escapeHtml(c.abbr)}...`)}
     </div>
   `;
@@ -2014,6 +2017,8 @@ function renderBfcWide(){
         </div>
         <div class="note-small">Opens your mail app addressed to the office — write whatever you need.</div>
       </div>
+
+      ${renderTrackedItemsSection(BFCWIDE_ID)}
 
       ${renderNotesSection(BFCWIDE_ID, 'Talking points, term goals, running notes for the full council...')}
     </div>
@@ -2101,6 +2106,8 @@ function renderGeneralNotes(){
       <p class="charge">Notes that don't belong to any particular committee — running thoughts, reminders, anything general.</p>
       ${upd ? `<div class="note-small" style="margin:-14px 0 20px;">Last updated ${formatDateTime(upd)}</div>` : ''}
 
+      ${renderTrackedItemsSection(GENERAL_NOTES_ID)}
+
       ${renderNotesSection(GENERAL_NOTES_ID, "General notes, reminders, anything that doesn't belong under a specific committee...")}
     </div>
   `;
@@ -2108,37 +2115,46 @@ function renderGeneralNotes(){
 
 function renderSpecialPage(p){
   const upd = lastUpdatedFor(p.id);
-  const trackedItems = getTrackedItems(p.id);
-  const itemsHtml = trackedItems.map(it=>renderTrackedItemCard(it)).join('') || `<div class="note-empty">No tracked items yet.</div>`;
   return `
     <div class="page">
       <div class="page-head"><h1>${escapeHtml(p.title)}</h1></div>
       <p class="charge">${escapeHtml(p.intro)}</p>
       ${upd ? `<div class="note-small" style="margin:-14px 0 20px;">Last updated ${formatDateTime(upd)}</div>` : ''}
 
-      <div class="card" data-tracked-page="${p.id}">
-        <h2>Tracked Items <span class="note-count">${trackedItems.length}</span></h2>
-        <div id="trackedItemsList">${itemsHtml}</div>
-        <div class="actions">
-          <button class="btn" id="addTrackedItemBtn">+ Add Tracked Item</button>
-        </div>
-        <div id="trackedItemComposer" style="display:none;margin-top:12px;">
-          <textarea id="newTrackedItemLabel" rows="2" placeholder="What are you tracking?"></textarea>
-          <input type="url" id="newTrackedItemUrl" placeholder="Link (optional)" style="width:100%;margin-top:6px;">
-          <details style="margin-top:6px;">
-            <summary class="note-small" style="cursor:pointer;">+ second link (optional)</summary>
-            <input type="url" id="newTrackedItemUrl2" placeholder="Second link (optional)" style="width:100%;margin-top:6px;">
-            <input type="text" id="newTrackedItemLabel2" placeholder="Second link label (e.g. coverage)" style="width:100%;margin-top:4px;">
-          </details>
-          <div class="actions">
-            <button class="btn-primary btn" id="saveTrackedItemBtn">Save</button>
-            <button class="btn" id="cancelTrackedItemBtn">Cancel</button>
-          </div>
-        </div>
-        ${SPECIAL_PAGE_BACKGROUND[p.id] ? `<div class="note-small" style="margin-top:10px;">ℹ️ ${escapeHtml(SPECIAL_PAGE_BACKGROUND[p.id])}</div>` : ''}
-      </div>
+      ${renderTrackedItemsSection(p.id, SPECIAL_PAGE_BACKGROUND[p.id])}
 
       ${renderNotesSection(p.id, `Notes, status, next steps for ${escapeHtml(p.title)}...`)}
+    </div>
+  `;
+}
+
+// Shared by every page type (committees, BFC-Wide, General Notes, and the reference/special pages)
+// — a public, DB-backed list of tracked items, editable right here, no code changes needed. backgroundNote
+// (used only by the special/reference pages) renders as a small ℹ️ line under the list.
+function renderTrackedItemsSection(pageId, backgroundNote){
+  const trackedItems = getTrackedItems(pageId);
+  const itemsHtml = trackedItems.map(it=>renderTrackedItemCard(it)).join('') || `<div class="note-empty">No tracked items yet.</div>`;
+  return `
+    <div class="card" data-tracked-page="${pageId}">
+      <h2>Tracked Items <span class="note-count">${trackedItems.length}</span></h2>
+      <div id="trackedItemsList">${itemsHtml}</div>
+      <div class="actions">
+        <button class="btn" id="addTrackedItemBtn">+ Add Tracked Item</button>
+      </div>
+      <div id="trackedItemComposer" style="display:none;margin-top:12px;">
+        <textarea id="newTrackedItemLabel" rows="2" placeholder="What are you tracking?"></textarea>
+        <input type="url" id="newTrackedItemUrl" placeholder="Link (optional)" style="width:100%;margin-top:6px;">
+        <details style="margin-top:6px;">
+          <summary class="note-small" style="cursor:pointer;">+ second link (optional)</summary>
+          <input type="url" id="newTrackedItemUrl2" placeholder="Second link (optional)" style="width:100%;margin-top:6px;">
+          <input type="text" id="newTrackedItemLabel2" placeholder="Second link label (e.g. coverage)" style="width:100%;margin-top:4px;">
+        </details>
+        <div class="actions">
+          <button class="btn-primary btn" id="saveTrackedItemBtn">Save</button>
+          <button class="btn" id="cancelTrackedItemBtn">Cancel</button>
+        </div>
+      </div>
+      ${backgroundNote ? `<div class="note-small" style="margin-top:10px;">ℹ️ ${escapeHtml(backgroundNote)}</div>` : ''}
     </div>
   `;
 }
@@ -2291,14 +2307,13 @@ function renderNotesSection(committeeId, placeholder){
 
 function renderNoteCard(n, committeeId){
   const edited = n.updated_at && n.updated_at !== n.created_at;
-  const canPromote = SPECIAL_PAGE_IDS.includes(committeeId);
   return `<div class="note-card" data-id="${n.id}">
      <div class="note-meta">${formatDateTime(n.created_at)}${edited ? ' · edited ' + formatDateTime(n.updated_at) : ''}</div>
      <div class="note-body" data-role="view">${escapeHtml(n.body)}</div>
      <textarea class="note-edit" data-role="edit" style="display:none;" rows="4">${escapeHtml(n.body)}</textarea>
      <div class="note-actions" data-role="default-actions">
        <button class="link-btn" data-act="edit">Edit</button>
-       ${canPromote ? `<button class="link-btn" data-act="promote" title="Move this note into the Tracked Items list above">→ Track</button>` : ''}
+       <button class="link-btn" data-act="promote" title="Move this note into the Tracked Items list above">→ Track</button>
        <button class="link-btn danger" data-act="delete">Delete</button>
      </div>
      <div class="note-actions" data-role="edit-actions" style="display:none;">
@@ -2389,10 +2404,11 @@ function attachNotesListeners(committeeId){
         }
       });
     } else if(act === 'promote'){
-      // Only shown on reference pages (see canPromote in renderNoteCard) — moves a note's text
-      // into that same page's Tracked Items list (public content) and removes it from Notes
-      // (private). Undo reverses both halves: removes the tracked item it just created, and
-      // restores the note, matching the same explicit-undo pattern used everywhere else here.
+      // Every page (committees, BFC-Wide, General Notes, reference pages) has both a Notes card
+      // and a Tracked Items card now, so this always has somewhere to go — moves a note's text
+      // into this page's Tracked Items list (public content) and removes it from Notes (private).
+      // Undo reverses both halves: removes the tracked item it just created, and restores the
+      // note, matching the same explicit-undo pattern used everywhere else here.
       const noteRow = queryOne('SELECT body FROM notes WHERE id = ?', [noteId]);
       const body = noteRow ? noteRow.body : '';
       if(!body) return;
