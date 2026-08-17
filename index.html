@@ -633,7 +633,7 @@ else if (typeof exports === 'object'){
 /* Set to the real date/time of the actual edit, every time the app itself (this file) is
    changed and handed off to you to push — shown (with time) near "Welcome" on Home and in the
    sidebar footer, so you can tell at a glance whether GitHub Pages is serving your latest push. */
-const APP_BUILD_DATE = "2026-08-17T14:52:15.000Z";
+const APP_BUILD_DATE = "2026-08-17T15:50:23.000Z";
 
 /* Update this once you've created a suggestions form (Google Forms or Microsoft Forms both work
    fine — a few fields like "Your name (optional)", "Your suggestion", "Which area does this
@@ -791,16 +791,21 @@ const BFC_COMMITTEES = [
 // out into their own nav/home group so they read as leadership committees, not standing ones.
 const BFC_LEADERSHIP_IDS = ['bfc-ec', 'bfc-nomcom', 'bfc-lrpc'];
 
+// Individual per-committee pages (aac.html, bac.html, etc.) 404 for real visitors even though they
+// still return content to automated fetches — both Virginia (BFC office) and Amr hit this directly.
+// UFC has apparently consolidated these into one page with all committees as sections, so every
+// affected committee now points there instead of its old dead deep link.
+const UFC_COMMITTEES_PAGE = 'https://ufc.iu.edu/committees/index.html';
 const UFC_COMMITTEES = [
-  {id:'ufc-aa', abbr:'AA', name:'Academic Affairs', charge:'Oversees academic-related matters across IU campuses, with faculty representation from each institution.', url:'https://ufc.iu.edu/committees/aac.html'},
-  {id:'ufc-ba', abbr:'BA', name:'Budgetary Advisory', charge:'Addresses fiscal and financial planning concerns; includes an ex-officio CFO member.', url:'https://ufc.iu.edu/committees/bac.html'},
-  {id:'ufc-ec', abbr:'EC', name:'Executive', charge:'Led by the University President as Presiding Officer, with co-chairs from major campuses.', url:'https://ufc.iu.edu/committees/index.html'},
-  {id:'ufc-fa', abbr:'FA', name:'Faculty Affairs', charge:'Handles personnel and professional development issues for faculty members university-wide.', url:'https://ufc.iu.edu/committees/fac.html'},
-  {id:'ufc-ra', abbr:'RA', name:'Research Affairs', charge:'Manages research-related policies and initiatives; VP for Research serves ex-officio.', url:'https://ufc.iu.edu/committees/researchaffairs.html'},
+  {id:'ufc-aa', abbr:'AA', name:'Academic Affairs', charge:'Oversees academic-related matters across IU campuses, with faculty representation from each institution.', url:UFC_COMMITTEES_PAGE},
+  {id:'ufc-ba', abbr:'BA', name:'Budgetary Advisory', charge:'Addresses fiscal and financial planning concerns; includes an ex-officio CFO member.', url:UFC_COMMITTEES_PAGE},
+  {id:'ufc-ec', abbr:'EC', name:'Executive', charge:'Led by the University President as Presiding Officer, with co-chairs from major campuses.', url:UFC_COMMITTEES_PAGE},
+  {id:'ufc-fa', abbr:'FA', name:'Faculty Affairs', charge:'Handles personnel and professional development issues for faculty members university-wide.', url:UFC_COMMITTEES_PAGE},
+  {id:'ufc-ra', abbr:'RA', name:'Research Affairs', charge:'Manages research-related policies and initiatives; VP for Research serves ex-officio.', url:UFC_COMMITTEES_PAGE},
   {id:'ufc-hd', abbr:'HD', name:'Honorary Degrees', charge:'Governed by university policy ACA-62; administers honorary degree considerations.', url:'https://policies.iu.edu/policies/aca-62-honorary-degrees/index.html'},
-  {id:'ufc-oe', abbr:'OE', name:'Online Education', charge:'Addresses distance learning and digital academic programs. Runs as a subcommittee under UFC Academic Affairs.', url:'https://ufc.iu.edu/committees/aac.html'},
-  {id:'ufc-sa', abbr:'SA', name:'Student Affairs', charge:'Focuses on student-related policies and support services university-wide.', url:'https://ufc.iu.edu/committees/sac.html'},
-  {id:'ufc-tp', abbr:'TP', name:'Technology Policy', charge:'Oversees technology standards and digital infrastructure matters university-wide.', url:'https://ufc.iu.edu/committees/tpc.html'}
+  {id:'ufc-oe', abbr:'OE', name:'Online Education', charge:'Addresses distance learning and digital academic programs. Runs as a subcommittee under UFC Academic Affairs.', url:UFC_COMMITTEES_PAGE},
+  {id:'ufc-sa', abbr:'SA', name:'Student Affairs', charge:'Focuses on student-related policies and support services university-wide.', url:UFC_COMMITTEES_PAGE},
+  {id:'ufc-tp', abbr:'TP', name:'Technology Policy', charge:'Oversees technology standards and digital infrastructure matters university-wide.', url:UFC_COMMITTEES_PAGE}
 ];
 
 // Same treatment as BFC_LEADERSHIP_IDS above — the UFC Executive Committee runs the UFC itself.
@@ -1886,7 +1891,7 @@ function renderCommittee(c){
       <div class="page-head">
         <span class="badge badge-${c.level.toLowerCase()}">${LEVEL_LABELS[c.level] || c.level}</span>
         <h1>${escapeHtml(c.name)}</h1>
-        <a class="ext-link" href="${c.url}" target="_blank" rel="noopener">Committee page ↗</a>
+        <a class="ext-link" href="${c.url}" target="_blank" rel="noopener">${c.url === UFC_COMMITTEES_PAGE ? 'UFC Committees page (scroll to find this one) ↗' : 'Committee page ↗'}</a>
       </div>
       <p class="charge">${escapeHtml(c.charge)}</p>
       ${upd ? `<div class="note-small" style="margin:-14px 0 20px;">Last updated ${formatDateTime(upd)}</div>` : ''}
