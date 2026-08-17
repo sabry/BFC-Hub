@@ -633,7 +633,7 @@ else if (typeof exports === 'object'){
 /* Set to the real date/time of the actual edit, every time the app itself (this file) is
    changed and handed off to you to push — shown (with time) near "Welcome" on Home and in the
    sidebar footer, so you can tell at a glance whether GitHub Pages is serving your latest push. */
-const APP_BUILD_DATE = "2026-08-17T16:48:05.000Z";
+const APP_BUILD_DATE = "2026-08-17T17:00:34.000Z";
 
 /* Update this once you've created a suggestions form (Google Forms or Microsoft Forms both work
    fine — a few fields like "Your name (optional)", "Your suggestion", "Which area does this
@@ -1024,10 +1024,41 @@ function ensureSchema(){
     key TEXT PRIMARY KEY,
     value TEXT
   );`);
+  db.run(`CREATE TABLE IF NOT EXISTS tracked_items (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    page_id TEXT NOT NULL,
+    label TEXT NOT NULL,
+    url TEXT DEFAULT '',
+    url2 TEXT DEFAULT '',
+    label2 TEXT DEFAULT '',
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+  );`);
+  db.run(`CREATE INDEX IF NOT EXISTS idx_tracked_items_page ON tracked_items(page_id);`);
   migrateOldSeedTimestamp();
   migrateRemoveLegacySeedNotes();
   migrateChairEmailCorrections();
+  migrateSeedTrackedItems();
   seedDefaults();
+}
+
+// One-time migration: "Tracked Items" on reference pages (Coordination, BOT Policies, UFC Policies,
+// Policy Chairs, IUB Issues, State/National) used to be hardcoded in the app's source — the only way
+// to change one was shipping a new build. They now live in the tracked_items table so you can add,
+// edit, and remove them yourself from the page. This copies the built-in list into the table exactly
+// once, gated by the settings flag below, so it never duplicates or resurrects something you deleted
+// on a later load. Safe to run every time — after the flag is set, this is a no-op forever.
+function migrateSeedTrackedItems(){
+  if(getSetting('tracked_items_seeded_v1', null)) return;
+  SPECIAL_PAGES.forEach(p=>{
+    (p.items||[]).forEach(it=>{
+      db.run(
+        `INSERT INTO tracked_items (page_id, label, url, url2, label2, created_at, updated_at) VALUES (?,?,?,?,?,?,?)`,
+        [p.id, it.label, it.url||'', it.url2||'', it.label2||'', SEED_DATE, SEED_DATE]
+      );
+    });
+  });
+  setSetting('tracked_items_seeded_v1', 'true');
 }
 
 // One-time fix: a handful of chair emails were confirmed/corrected after the initial seed
@@ -1143,7 +1174,9 @@ function lastUpdatedFor(committeeId){
        SELECT updated_at as ts FROM committees WHERE id = ?
        UNION ALL
        SELECT updated_at as ts FROM notes WHERE committee_id = ?
-     )`, [committeeId, committeeId]);
+       UNION ALL
+       SELECT updated_at as ts FROM tracked_items WHERE page_id = ?
+     )`, [committeeId, committeeId, committeeId]);
   return row && row.ts ? row.ts : null;
 }
 function globalLastUpdated(){
@@ -1152,6 +1185,8 @@ function globalLastUpdated(){
        SELECT updated_at as ts FROM committees
        UNION ALL
        SELECT updated_at as ts FROM notes
+       UNION ALL
+       SELECT updated_at as ts FROM tracked_items
      )`);
   return row && row.ts ? row.ts : null;
 }
@@ -1176,6 +1211,23 @@ function deleteNoteById(noteId){
 function totalNoteCount(){
   const row = queryOne('SELECT COUNT(*) as c FROM notes');
   return row ? row.c : 0;
+}
+/* Tracked items: the public "Tracked Items" list on reference pages (Coordination, BOT Policies,
+   etc.) — unlike Notes, these aren't private, they're the page's actual content. url2/label2 hold an
+   optional second link (used for e.g. a policy's direct text alongside a news-coverage link). */
+function getTrackedItems(pageId){
+  return queryAll('SELECT id, label, url, url2, label2, created_at, updated_at FROM tracked_items WHERE page_id = ? ORDER BY id ASC', [pageId]);
+}
+function addTrackedItem(pageId, label, url, url2, label2){
+  const now = new Date().toISOString();
+  db.run('INSERT INTO tracked_items (page_id, label, url, url2, label2, created_at, updated_at) VALUES (?,?,?,?,?,?,?)', [pageId, label, url||'', url2||'', label2||'', now, now]);
+}
+function updateTrackedItem(id, label, url, url2, label2){
+  const now = new Date().toISOString();
+  db.run('UPDATE tracked_items SET label=?, url=?, url2=?, label2=?, updated_at=? WHERE id=?', [label, url||'', url2||'', label2||'', now, id]);
+}
+function deleteTrackedItemById(id){
+  db.run('DELETE FROM tracked_items WHERE id = ?', [id]);
 }
 /* Todo list: deliberately has no "completed" flag — checking an item off deletes the row outright
    (per how this list is meant to be used: a running to-do, not a permanent log of finished work).
@@ -1690,6 +1742,7 @@ function renderMain(){
   if(SPECIAL_PAGE_IDS.includes(currentTab)){
     const p = specialPageById[currentTab];
     main.innerHTML = renderSpecialPage(p);
+    attachTrackedItemListeners(p.id);
     attachNotesListeners(p.id);
     return;
   }
@@ -2055,20 +2108,33 @@ function renderGeneralNotes(){
 
 function renderSpecialPage(p){
   const upd = lastUpdatedFor(p.id);
-  const items = p.items.map(it=>{
-    const main = it.url ? `<a href="${it.url}" target="_blank" rel="noopener">${escapeHtml(it.label)} ↗</a>` : escapeHtml(it.label);
-    const secondary = it.url2 ? ` <a href="${it.url2}" target="_blank" rel="noopener" class="note-small" style="white-space:nowrap;">(${escapeHtml(it.label2 || 'coverage')} ↗)</a>` : '';
-    return `<li>${main}${secondary}</li>`;
-  }).join('');
+  const trackedItems = getTrackedItems(p.id);
+  const itemsHtml = trackedItems.map(it=>renderTrackedItemCard(it)).join('') || `<div class="note-empty">No tracked items yet.</div>`;
   return `
     <div class="page">
       <div class="page-head"><h1>${escapeHtml(p.title)}</h1></div>
       <p class="charge">${escapeHtml(p.intro)}</p>
       ${upd ? `<div class="note-small" style="margin:-14px 0 20px;">Last updated ${formatDateTime(upd)}</div>` : ''}
 
-      <div class="card">
-        <h2>Tracked Items</h2>
-        <ul class="ref-list">${items}</ul>
+      <div class="card" data-tracked-page="${p.id}">
+        <h2>Tracked Items <span class="note-count">${trackedItems.length}</span></h2>
+        <div id="trackedItemsList">${itemsHtml}</div>
+        <div class="actions">
+          <button class="btn" id="addTrackedItemBtn">+ Add Tracked Item</button>
+        </div>
+        <div id="trackedItemComposer" style="display:none;margin-top:12px;">
+          <textarea id="newTrackedItemLabel" rows="2" placeholder="What are you tracking?"></textarea>
+          <input type="url" id="newTrackedItemUrl" placeholder="Link (optional)" style="width:100%;margin-top:6px;">
+          <details style="margin-top:6px;">
+            <summary class="note-small" style="cursor:pointer;">+ second link (optional)</summary>
+            <input type="url" id="newTrackedItemUrl2" placeholder="Second link (optional)" style="width:100%;margin-top:6px;">
+            <input type="text" id="newTrackedItemLabel2" placeholder="Second link label (e.g. coverage)" style="width:100%;margin-top:4px;">
+          </details>
+          <div class="actions">
+            <button class="btn-primary btn" id="saveTrackedItemBtn">Save</button>
+            <button class="btn" id="cancelTrackedItemBtn">Cancel</button>
+          </div>
+        </div>
         ${SPECIAL_PAGE_BACKGROUND[p.id] ? `<div class="note-small" style="margin-top:10px;">ℹ️ ${escapeHtml(SPECIAL_PAGE_BACKGROUND[p.id])}</div>` : ''}
       </div>
 
@@ -2077,11 +2143,133 @@ function renderSpecialPage(p){
   `;
 }
 
+function renderTrackedItemCard(it){
+  const linkHtml = it.url ? `<a href="${it.url}" target="_blank" rel="noopener">${escapeHtml(it.label)} ↗</a>` : escapeHtml(it.label);
+  const secondaryHtml = it.url2 ? ` <a href="${it.url2}" target="_blank" rel="noopener" class="note-small" style="white-space:nowrap;">(${escapeHtml(it.label2 || 'coverage')} ↗)</a>` : '';
+  return `<div class="note-card" data-id="${it.id}">
+     <div class="note-body" data-role="view">${linkHtml}${secondaryHtml}</div>
+     <div data-role="edit" style="display:none;">
+       <textarea class="note-edit" data-role="edit-label" rows="2">${escapeHtml(it.label)}</textarea>
+       <input type="url" data-role="edit-url" value="${escapeHtml(it.url||'')}" placeholder="Link (optional)" style="width:100%;margin-top:6px;">
+       <details style="margin-top:6px;" ${it.url2 ? 'open' : ''}>
+         <summary class="note-small" style="cursor:pointer;">+ second link (optional)</summary>
+         <input type="url" data-role="edit-url2" value="${escapeHtml(it.url2||'')}" placeholder="Second link (optional)" style="width:100%;margin-top:6px;">
+         <input type="text" data-role="edit-label2" value="${escapeHtml(it.label2||'')}" placeholder="Second link label (e.g. coverage)" style="width:100%;margin-top:4px;">
+       </details>
+     </div>
+     <div class="note-actions" data-role="default-actions">
+       <button class="link-btn" data-act="edit">Edit</button>
+       <button class="link-btn danger" data-act="delete">Delete</button>
+     </div>
+     <div class="note-actions" data-role="edit-actions" style="display:none;">
+       <button class="link-btn" data-act="save">Save</button>
+       <button class="link-btn" data-act="cancel">Cancel</button>
+     </div>
+     <div class="confirm-row" data-role="confirm-row" style="display:none;">
+       Remove this tracked item? <button class="link-btn danger" data-act="confirm-delete">Yes, remove</button> <button class="link-btn" data-act="cancel-delete">No</button>
+     </div>
+  </div>`;
+}
+
+function attachTrackedItemListeners(pageId){
+  const addBtn = document.getElementById('addTrackedItemBtn');
+  const composer = document.getElementById('trackedItemComposer');
+  const newLabel = document.getElementById('newTrackedItemLabel');
+  const newUrl = document.getElementById('newTrackedItemUrl');
+  const newUrl2 = document.getElementById('newTrackedItemUrl2');
+  const newLabel2 = document.getElementById('newTrackedItemLabel2');
+  addBtn.addEventListener('click', ()=>{
+    composer.style.display = 'block';
+    newLabel.value = ''; newUrl.value = ''; newUrl2.value = ''; newLabel2.value = '';
+    newLabel.focus();
+  });
+  document.getElementById('cancelTrackedItemBtn').addEventListener('click', ()=>{
+    composer.style.display = 'none';
+  });
+  document.getElementById('saveTrackedItemBtn').addEventListener('click', ()=>{
+    const label = newLabel.value.trim();
+    if(!label){ showToast('Tracked item needs a description.'); return; }
+    addTrackedItem(pageId, label, newUrl.value.trim(), newUrl2.value.trim(), newLabel2.value.trim());
+    debouncedSave();
+    refreshTrackedItems(pageId);
+    showToast('Tracked item added.');
+  });
+
+  const list = document.getElementById('trackedItemsList');
+  list.addEventListener('click', (e)=>{
+    const btn = e.target.closest('button[data-act]');
+    if(!btn) return;
+    const cardEl = e.target.closest('.note-card');
+    const itemId = Number(cardEl.dataset.id);
+    const act = btn.dataset.act;
+
+    const viewEl = cardEl.querySelector('[data-role="view"]');
+    const editEl = cardEl.querySelector('[data-role="edit"]');
+    const defaultActions = cardEl.querySelector('[data-role="default-actions"]');
+    const editActions = cardEl.querySelector('[data-role="edit-actions"]');
+    const confirmRow = cardEl.querySelector('[data-role="confirm-row"]');
+
+    if(act === 'edit'){
+      viewEl.style.display = 'none';
+      editEl.style.display = 'block';
+      defaultActions.style.display = 'none';
+      editActions.style.display = 'flex';
+      confirmRow.style.display = 'none';
+    } else if(act === 'cancel'){
+      viewEl.style.display = 'block';
+      editEl.style.display = 'none';
+      defaultActions.style.display = 'flex';
+      editActions.style.display = 'none';
+    } else if(act === 'save'){
+      const label = editEl.querySelector('[data-role="edit-label"]').value.trim();
+      if(!label){ showToast('Tracked item needs a description.'); return; }
+      const url = editEl.querySelector('[data-role="edit-url"]').value.trim();
+      const url2 = editEl.querySelector('[data-role="edit-url2"]').value.trim();
+      const label2 = editEl.querySelector('[data-role="edit-label2"]').value.trim();
+      updateTrackedItem(itemId, label, url, url2, label2);
+      debouncedSave();
+      refreshTrackedItems(pageId);
+      showToast('Tracked item updated.');
+    } else if(act === 'delete'){
+      defaultActions.style.display = 'none';
+      confirmRow.style.display = 'block';
+    } else if(act === 'cancel-delete'){
+      confirmRow.style.display = 'none';
+      defaultActions.style.display = 'flex';
+    } else if(act === 'confirm-delete'){
+      const row = queryOne('SELECT label, url, url2, label2 FROM tracked_items WHERE id = ?', [itemId]);
+      deleteTrackedItemById(itemId);
+      debouncedSave();
+      refreshTrackedItems(pageId);
+      showToast('Tracked item removed.', row ? {
+        label: 'Undo',
+        onClick: ()=>{
+          addTrackedItem(pageId, row.label, row.url, row.url2, row.label2);
+          debouncedSave();
+          refreshTrackedItems(pageId);
+        }
+      } : undefined);
+    }
+  });
+}
+
+function refreshTrackedItems(pageId){
+  // Same non-re-binding rationale as refreshNotes() below: the composer and #trackedItemsList
+  // container persist across refreshes, so their listeners (bound once in attachTrackedItemListeners)
+  // stay live — re-attaching here would double-fire every action.
+  const cardEl = document.querySelector(`.card[data-tracked-page="${pageId}"]`);
+  if(!cardEl) return;
+  const items = getTrackedItems(pageId);
+  cardEl.querySelector('.note-count').textContent = items.length;
+  cardEl.querySelector('#trackedItemsList').innerHTML = items.map(it=>renderTrackedItemCard(it)).join('') || `<div class="note-empty">No tracked items yet.</div>`;
+  document.getElementById('trackedItemComposer').style.display = 'none';
+}
+
 /* ---------------- Notes section (shared by committee pages + BFC-wide) ---------------- */
 
 function renderNotesSection(committeeId, placeholder){
   const notes = getNotes(committeeId);
-  const items = notes.map(n=>renderNoteCard(n)).join('') || `<div class="note-empty">No notes yet.</div>`;
+  const items = notes.map(n=>renderNoteCard(n, committeeId)).join('') || `<div class="note-empty">No notes yet.</div>`;
   return `
     <div class="card" data-committee="${committeeId}">
       <h2>Notes <span class="note-count">${notes.length}</span></h2>
@@ -2101,14 +2289,16 @@ function renderNotesSection(committeeId, placeholder){
   `;
 }
 
-function renderNoteCard(n){
+function renderNoteCard(n, committeeId){
   const edited = n.updated_at && n.updated_at !== n.created_at;
+  const canPromote = SPECIAL_PAGE_IDS.includes(committeeId);
   return `<div class="note-card" data-id="${n.id}">
      <div class="note-meta">${formatDateTime(n.created_at)}${edited ? ' · edited ' + formatDateTime(n.updated_at) : ''}</div>
      <div class="note-body" data-role="view">${escapeHtml(n.body)}</div>
      <textarea class="note-edit" data-role="edit" style="display:none;" rows="4">${escapeHtml(n.body)}</textarea>
      <div class="note-actions" data-role="default-actions">
        <button class="link-btn" data-act="edit">Edit</button>
+       ${canPromote ? `<button class="link-btn" data-act="promote" title="Move this note into the Tracked Items list above">→ Track</button>` : ''}
        <button class="link-btn danger" data-act="delete">Delete</button>
      </div>
      <div class="note-actions" data-role="edit-actions" style="display:none;">
@@ -2198,6 +2388,32 @@ function attachNotesListeners(committeeId){
           renderSidebar();
         }
       });
+    } else if(act === 'promote'){
+      // Only shown on reference pages (see canPromote in renderNoteCard) — moves a note's text
+      // into that same page's Tracked Items list (public content) and removes it from Notes
+      // (private). Undo reverses both halves: removes the tracked item it just created, and
+      // restores the note, matching the same explicit-undo pattern used everywhere else here.
+      const noteRow = queryOne('SELECT body FROM notes WHERE id = ?', [noteId]);
+      const body = noteRow ? noteRow.body : '';
+      if(!body) return;
+      deleteNoteById(noteId);
+      addTrackedItem(committeeId, body, '', '', '');
+      debouncedSave();
+      refreshNotes(committeeId);
+      refreshTrackedItems(committeeId);
+      renderSidebar();
+      showToast('Promoted to a tracked item.', {
+        label: 'Undo',
+        onClick: ()=>{
+          const justAdded = queryOne('SELECT id FROM tracked_items WHERE page_id = ? AND label = ? ORDER BY id DESC LIMIT 1', [committeeId, body]);
+          if(justAdded) deleteTrackedItemById(justAdded.id);
+          addNote(committeeId, body);
+          debouncedSave();
+          refreshNotes(committeeId);
+          refreshTrackedItems(committeeId);
+          renderSidebar();
+        }
+      });
     }
   });
 }
@@ -2212,7 +2428,7 @@ function refreshNotes(committeeId){
   if(!cardEl) return;
   const notes = getNotes(committeeId);
   cardEl.querySelector('.note-count').textContent = notes.length;
-  cardEl.querySelector('#notesList').innerHTML = notes.map(n=>renderNoteCard(n)).join('') || `<div class="note-empty">No notes yet.</div>`;
+  cardEl.querySelector('#notesList').innerHTML = notes.map(n=>renderNoteCard(n, committeeId)).join('') || `<div class="note-empty">No notes yet.</div>`;
   document.getElementById('noteComposer').style.display = 'none';
 }
 
