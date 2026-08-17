@@ -633,7 +633,7 @@ else if (typeof exports === 'object'){
 /* Set to the real date/time of the actual edit, every time the app itself (this file) is
    changed and handed off to you to push — shown (with time) near "Welcome" on Home and in the
    sidebar footer, so you can tell at a glance whether GitHub Pages is serving your latest push. */
-const APP_BUILD_DATE = "2026-08-17T14:22:15.000Z";
+const APP_BUILD_DATE = "2026-08-17T14:37:25.000Z";
 
 /* Update this once you've created a suggestions form (Google Forms or Microsoft Forms both work
    fine — a few fields like "Your name (optional)", "Your suggestion", "Which area does this
@@ -841,12 +841,12 @@ const SPECIAL_PAGES = [
   ]},
   {id:'bot-policies', navIcon:'📋', navLabel:'BOT Policies', title:'BOT Policies', intro:"Policy chairs' agenda, plus Board of Trustees (BOT) policy reviews tracked via IU's Policy Alignment Initiative.", items:[
     {label:'AI usage in syllabi'},
-    {label:'BOT-34 Conflicts of Interest and Commitment — approved Aug 14, 2026 (annual disclosure required; heightened review for research involving "countries of concern")', url:'https://today.iu.edu/live/news/52469-trustees-approve-updated-conflict-of-interest-and'},
-    {label:'BOT-24 Post-Tenure Faculty Review — finalized June 2026; new review criteria apply starting the 2027 review cycle (aligned to SEA 202 / HEA 1001 state requirements)', url:'https://www.idsnews.com/article/2026/06/iu-board-of-trustees-approves-policy-revisions-2026-27-operating-budget'},
-    {label:'BOT-11 Faculty/Librarian Tenure and Promotion — consolidated across campuses into one framework, finalized June 2026', url:'https://www.idsnews.com/article/2026/06/iu-board-of-trustees-approves-policy-revisions-2026-27-operating-budget'},
-    {label:'BOT-15 Code of Academic Ethics — clarified misconduct standards, distinguishes protected speech from reviewable conduct, finalized June 2026', url:'https://www.idsnews.com/article/2026/06/iu-board-of-trustees-approves-policy-revisions-2026-27-operating-budget'},
-    {label:'BOT-25 Merger, Reorganization, and Elimination of Academic Units and Programs — revised Feb 20, 2026 (strengthened tenured-faculty protections and transparency)'},
-    {label:'BOT-20 Administrator Hiring — broader stakeholder representation on search committees, finalized June 2026'},
+    {label:'BOT-34 Conflicts of Interest and Commitment — approved Aug 14, 2026 (annual disclosure required; heightened review for research involving "countries of concern")', url:'https://policies.iu.edu/policies/bot-34-conflicts-of-interest-commitment/index.html', url2:'https://today.iu.edu/live/news/52469-trustees-approve-updated-conflict-of-interest-and', label2:'IU Today coverage'},
+    {label:'BOT-24 Post-Tenure Faculty Review — finalized June 2026; new review criteria apply starting the 2027 review cycle (aligned to SEA 202 / HEA 1001 state requirements)', url:'https://policies.iu.edu/policies/bot-24-post-tenure-faculty/index.html', url2:'https://www.idsnews.com/article/2026/06/iu-board-of-trustees-approves-policy-revisions-2026-27-operating-budget', label2:'IDS coverage'},
+    {label:'BOT-11 Faculty/Librarian Tenure and Promotion — consolidated across campuses into one framework, finalized June 2026', url:'https://policies.iu.edu/policies/bot-11-faculty-librarian-tenure/index.html', url2:'https://www.idsnews.com/article/2026/06/iu-board-of-trustees-approves-policy-revisions-2026-27-operating-budget', label2:'IDS coverage'},
+    {label:'BOT-15 Code of Academic Ethics — clarified misconduct standards, distinguishes protected speech from reviewable conduct, finalized June 2026', url:'https://policies.iu.edu/policies/bot-15-code-academic-ethics/index.html', url2:'https://www.idsnews.com/article/2026/06/iu-board-of-trustees-approves-policy-revisions-2026-27-operating-budget', label2:'IDS coverage'},
+    {label:'BOT-25 Merger, Reorganization, and Elimination of Academic Units and Programs — revised Feb 20, 2026 (strengthened tenured-faculty protections and transparency)', url:'https://policies.iu.edu/policies/bot-25-merger-reorganization-elimination/index.html'},
+    {label:'BOT-20 Administrator Hiring — broader stakeholder representation on search committees, finalized June 2026', url:'https://policies.iu.edu/policies/bot-20-search-screen-administrators/index.html', url2:'https://www.idsnews.com/article/2026/06/iu-board-of-trustees-approves-policy-revisions-2026-27-operating-budget', label2:'IDS coverage'},
     {label:'Check policies.iu.edu for anything newly posted for comment', url:'https://policies.iu.edu/under-review/index.html'}
   ]},
   {id:'policy-chairs', navIcon:'📝', navLabel:'Policy Chairs', title:'Policy Committee Chairs', intro:'Monthly meetings (Wells House) that the BFC President-Elect organizes and chairs, under the BFC President’s invitation. A forum for school-level Policy Committee Chairs to compare policy developments across schools, coordinate faculty-led policy work, and bring common concerns to the BFC and to campus/university policy processes.', items:[
@@ -2031,9 +2031,11 @@ function renderGeneralNotes(){
 
 function renderSpecialPage(p){
   const upd = lastUpdatedFor(p.id);
-  const items = p.items.map(it=>
-    `<li>${it.url ? `<a href="${it.url}" target="_blank" rel="noopener">${escapeHtml(it.label)} ↗</a>` : escapeHtml(it.label)}</li>`
-  ).join('');
+  const items = p.items.map(it=>{
+    const main = it.url ? `<a href="${it.url}" target="_blank" rel="noopener">${escapeHtml(it.label)} ↗</a>` : escapeHtml(it.label);
+    const secondary = it.url2 ? ` <a href="${it.url2}" target="_blank" rel="noopener" class="note-small" style="white-space:nowrap;">(${escapeHtml(it.label2 || 'coverage')} ↗)</a>` : '';
+    return `<li>${main}${secondary}</li>`;
+  }).join('');
   return `
     <div class="page">
       <div class="page-head"><h1>${escapeHtml(p.title)}</h1></div>
@@ -2157,11 +2159,21 @@ function attachNotesListeners(committeeId){
       confirmRow.style.display = 'none';
       defaultActions.style.display = 'flex';
     } else if(act === 'confirm-delete'){
+      const noteRow = queryOne('SELECT body FROM notes WHERE id = ?', [noteId]);
+      const deletedBody = noteRow ? noteRow.body : '';
       deleteNoteById(noteId);
       debouncedSave();
       refreshNotes(committeeId);
       renderSidebar();
-      showToast('Note deleted.');
+      showToast('Note deleted.', {
+        label: 'Undo',
+        onClick: ()=>{
+          addNote(committeeId, deletedBody);
+          debouncedSave();
+          refreshNotes(committeeId);
+          renderSidebar();
+        }
+      });
     }
   });
 }
