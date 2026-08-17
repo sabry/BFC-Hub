@@ -335,6 +335,11 @@
     z-index:50;
   }
   #toast.show{opacity:1;transform:translateX(-50%) translateY(-4px);}
+  #toast.has-action{pointer-events:auto;}
+  .toast-action{
+    margin-left:10px;background:none;border:none;color:#fff;text-decoration:underline;
+    font-weight:700;font-size:13px;cursor:pointer;padding:0;
+  }
   #import-input{display:none;}
   a{color:var(--crimson);}
   .kv{font-size:13px;line-height:1.9;}
@@ -360,6 +365,14 @@
   .link-btn:hover{text-decoration:underline;}
   .confirm-row{font-size:12px;color:var(--ink-soft);}
   .note-empty{font-size:12.5px;color:var(--ink-soft);font-style:italic;padding:4px 0 8px;}
+  .todo-item{
+    display:flex;align-items:flex-start;gap:10px;
+    padding:9px 4px;border-bottom:1px solid var(--line);
+    cursor:pointer;
+  }
+  .todo-item:last-child{border-bottom:none;}
+  .todo-check{margin-top:3px;width:16px;height:16px;flex-shrink:0;cursor:pointer;}
+  .todo-text{font-size:13.5px;line-height:1.5;word-break:break-word;}
   #loading{padding:60px 20px;text-align:center;color:var(--ink-soft);font-size:14px;}
   .btn:disabled{opacity:.35;cursor:not-allowed;}
   .btn:disabled:hover{background:#fff;}
@@ -620,7 +633,7 @@ else if (typeof exports === 'object'){
 /* Set to the real date/time of the actual edit, every time the app itself (this file) is
    changed and handed off to you to push — shown (with time) near "Welcome" on Home and in the
    sidebar footer, so you can tell at a glance whether GitHub Pages is serving your latest push. */
-const APP_BUILD_DATE = "2026-08-17T12:44:44.000Z";
+const APP_BUILD_DATE = "2026-08-17T14:22:15.000Z";
 
 /* Update this once you've created a suggestions form (Google Forms or Microsoft Forms both work
    fine — a few fields like "Your name (optional)", "Your suggestion", "Which area does this
@@ -809,6 +822,8 @@ const ALL_COMMITTEES = [
 ];
 const byId = Object.fromEntries(ALL_COMMITTEES.map(c=>[c.id,c]));
 const BFCWIDE_ID = 'bfcwide';
+const TODOS_ID = 'todos';
+const GENERAL_NOTES_ID = 'general-notes';
 
 /* Reference/agenda pages: not committees, but tracked lists with their own dated notes
    (same notes mechanism as committee pages, keyed by these ids in the notes table). */
@@ -976,6 +991,11 @@ function ensureSchema(){
     updated_at TEXT NOT NULL
   );`);
   db.run(`CREATE INDEX IF NOT EXISTS idx_notes_committee ON notes(committee_id);`);
+  db.run(`CREATE TABLE IF NOT EXISTS todos (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    text TEXT NOT NULL,
+    created_at TEXT NOT NULL
+  );`);
   db.run(`CREATE TABLE IF NOT EXISTS settings (
     key TEXT PRIMARY KEY,
     value TEXT
@@ -1133,12 +1153,28 @@ function totalNoteCount(){
   const row = queryOne('SELECT COUNT(*) as c FROM notes');
   return row ? row.c : 0;
 }
+/* Todo list: deliberately has no "completed" flag — checking an item off deletes the row outright
+   (per how this list is meant to be used: a running to-do, not a permanent log of finished work).
+   deleteTodo() below pairs with an Undo toast so a slip of the finger isn't unrecoverable. */
+function getTodos(){
+  return queryAll('SELECT id, text, created_at FROM todos ORDER BY created_at ASC, id ASC');
+}
+function todoCount(){
+  const row = queryOne('SELECT COUNT(*) as c FROM todos');
+  return row ? row.c : 0;
+}
+function addTodo(text){
+  db.run('INSERT INTO todos (text, created_at) VALUES (?,?)', [text, new Date().toISOString()]);
+}
+function deleteTodoById(id){
+  db.run('DELETE FROM todos WHERE id = ?', [id]);
+}
 function committeesWithChairCount(){
   const row = queryOne("SELECT COUNT(*) as c FROM committees WHERE TRIM(chair_email) != ''");
   return row ? row.c : 0;
 }
 function committeesWithNotesCount(){
-  const excluded = [BFCWIDE_ID, ...SPECIAL_PAGE_IDS];
+  const excluded = [BFCWIDE_ID, GENERAL_NOTES_ID, ...SPECIAL_PAGE_IDS];
   const placeholders = excluded.map(()=>'?').join(',');
   const row = queryOne(`SELECT COUNT(DISTINCT committee_id) as c FROM notes WHERE committee_id NOT IN (${placeholders})`, excluded);
   return row ? row.c : 0;
@@ -1443,12 +1479,22 @@ function updateAppBuildFooter(){
   el.textContent = `App updated ${appBuildLabel()}`;
 }
 let toastTimer=null;
-function showToast(msg){
+function showToast(msg, action){
+  // action: optional {label, onClick} — e.g. an "Undo" button, for actions like deleting a
+  // checked-off todo where a slip of the finger shouldn't be unrecoverable.
   const t = document.getElementById('toast');
-  t.textContent = msg;
+  t.innerHTML = escapeHtml(msg) + (action ? ` <button class="toast-action" id="toastActionBtn">${escapeHtml(action.label)}</button>` : '');
   t.classList.add('show');
+  t.classList.toggle('has-action', !!action);
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(()=>t.classList.remove('show'), 3200);
+  if(action){
+    document.getElementById('toastActionBtn').addEventListener('click', ()=>{
+      clearTimeout(toastTimer);
+      t.classList.remove('show');
+      action.onClick();
+    });
+  }
+  toastTimer = setTimeout(()=>t.classList.remove('show'), action ? 5000 : 3200);
 }
 
 /* ---------------- Rendering: Sidebar ---------------- */
@@ -1495,6 +1541,8 @@ function renderSidebar(){
 
   let html = '';
   html += navItem('home', '🏠 Home', null);
+  html += navItem(TODOS_ID, '✅ To-Do List', todoCount() > 0);
+  html += navItem(GENERAL_NOTES_ID, '📝 General Notes', noteCount(GENERAL_NOTES_ID) > 0);
   const showBfcWide = activeFilter==='all' || activeFilter==='bfc' || (activeFilter==='notes' && noteCount(BFCWIDE_ID) > 0);
   if(showBfcWide){
     html += navItem('bfcwide', '📣 BFC-Wide Channel', noteCount(BFCWIDE_ID) > 0);
@@ -1583,7 +1631,7 @@ function toggleSidebar(){
 
 function initTab(){
   const hashTab = (location.hash || '').slice(1);
-  const startTab = (hashTab === 'home' || hashTab === 'bfcwide' || byId[hashTab] || specialPageById[hashTab]) ? hashTab : 'home';
+  const startTab = (hashTab === 'home' || hashTab === 'bfcwide' || hashTab === TODOS_ID || hashTab === GENERAL_NOTES_ID || byId[hashTab] || specialPageById[hashTab]) ? hashTab : 'home';
   currentTab = startTab;
   renderSidebar();
   renderMain();
@@ -1612,6 +1660,8 @@ function updateNavButtons(){
 function renderMain(){
   const main = document.getElementById('main');
   if(currentTab==='home'){ main.innerHTML = renderHome(); attachHomeListeners(); return; }
+  if(currentTab===TODOS_ID){ main.innerHTML = renderTodos(); attachTodoListeners(); return; }
+  if(currentTab===GENERAL_NOTES_ID){ main.innerHTML = renderGeneralNotes(); attachNotesListeners(GENERAL_NOTES_ID); return; }
   if(currentTab==='bfcwide'){ main.innerHTML = renderBfcWide(); attachNotesListeners(BFCWIDE_ID); attachBfcWideExtras(); return; }
   if(SPECIAL_PAGE_IDS.includes(currentTab)){
     const p = specialPageById[currentTab];
@@ -1897,6 +1947,86 @@ function attachBfcWideExtras(){
   document.getElementById('emailAllBtn').addEventListener('click', ()=>{
     window.location.href = `mailto:${cleanEmailList(BFC_OFFICE.email)}`;
   });
+}
+
+function renderTodos(){
+  const todos = getTodos();
+  const items = todos.map(t=>`
+    <label class="todo-item">
+      <input type="checkbox" class="todo-check" data-id="${t.id}">
+      <span class="todo-text">${escapeHtml(t.text)}</span>
+    </label>
+  `).join('') || `<div class="note-empty">Nothing on your list right now.</div>`;
+
+  return `
+    <div class="page">
+      <div class="page-head"><h1>To-Do List</h1></div>
+      <p class="charge">A running list for yourself — not tied to any committee. Check something off and it's removed (you'll get a few seconds to undo).</p>
+
+      <div class="card">
+        <div class="row" style="align-items:flex-end;">
+          <div style="flex:1;">
+            <label>New item</label>
+            <input type="text" id="newTodoText" placeholder="e.g., Follow up with Virginia about the Policy Chairs invite">
+          </div>
+          <button class="btn-primary btn" id="addTodoBtn">+ Add</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Items <span class="note-count">${todos.length}</span></h2>
+        <div id="todoList">${items}</div>
+      </div>
+    </div>
+  `;
+}
+
+function attachTodoListeners(){
+  const input = document.getElementById('newTodoText');
+  function submitNewTodo(){
+    const text = input.value.trim();
+    if(!text) return;
+    addTodo(text);
+    debouncedSave();
+    renderSidebar();
+    renderMain();
+  }
+  document.getElementById('addTodoBtn').addEventListener('click', submitNewTodo);
+  input.addEventListener('keydown', (e)=>{ if(e.key === 'Enter') submitNewTodo(); });
+
+  document.querySelectorAll('.todo-check').forEach(cb=>{
+    cb.addEventListener('change', ()=>{
+      const id = Number(cb.dataset.id);
+      const todo = getTodos().find(t=>t.id===id);
+      if(!todo) return;
+      deleteTodoById(id);
+      debouncedSave();
+      renderSidebar();
+      renderMain();
+      showToast('Checked off — removed.', {
+        label: 'Undo',
+        onClick: ()=>{
+          addTodo(todo.text);
+          debouncedSave();
+          renderSidebar();
+          renderMain();
+        }
+      });
+    });
+  });
+}
+
+function renderGeneralNotes(){
+  const upd = lastUpdatedFor(GENERAL_NOTES_ID);
+  return `
+    <div class="page">
+      <div class="page-head"><h1>General Notes</h1></div>
+      <p class="charge">Notes that don't belong to any particular committee — running thoughts, reminders, anything general.</p>
+      ${upd ? `<div class="note-small" style="margin:-14px 0 20px;">Last updated ${formatDateTime(upd)}</div>` : ''}
+
+      ${renderNotesSection(GENERAL_NOTES_ID, "General notes, reminders, anything that doesn't belong under a specific committee...")}
+    </div>
+  `;
 }
 
 function renderSpecialPage(p){
