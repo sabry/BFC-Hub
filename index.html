@@ -620,7 +620,7 @@ else if (typeof exports === 'object'){
 /* Set to the real date/time of the actual edit, every time the app itself (this file) is
    changed and handed off to you to push — shown (with time) near "Welcome" on Home and in the
    sidebar footer, so you can tell at a glance whether GitHub Pages is serving your latest push. */
-const APP_BUILD_DATE = "2026-08-17T12:35:47.000Z";
+const APP_BUILD_DATE = "2026-08-17T12:44:44.000Z";
 
 /* Update this once you've created a suggestions form (Google Forms or Microsoft Forms both work
    fine — a few fields like "Your name (optional)", "Your suggestion", "Which area does this
@@ -1322,6 +1322,7 @@ async function createNewDataFile(){
     await idbSet('dataFileHandle', handle);
     fileStatus = 'linked';
     persistAll();
+    renderSidebar(); renderMain(); // clears the "not saving yet" banner on Home immediately
     showToast('Data file created and linked.');
   }catch(e){ /* user cancelled */ }
   updateStatus();
@@ -1630,8 +1631,12 @@ function renderHome(){
   const withChair = committeesWithChairCount();
   const withNotes = committeesWithNotesCount();
 
-  const fileNote = fsApiSupported
-    ? `<div class="banner info">💾 For permanent local storage, click <b>&nbsp;Connect Data File&nbsp;</b> above. A file picker opens — choose an existing <code>bfc-hub-data.sqlite</code> to resume it, or cancel that dialog to create a new one (e.g. in Documents). This app then autosaves directly to that file on every change — picking or creating the file is the only permission step; nothing further to click through. Occasionally, after closing and reopening the browser, it may need one quick reconfirmation — if the status bar above shows a warning, just click <b>"Reconnect Data File"</b>, which is a one-click confirmation, not re-picking the file. Installing this app (browser menu → Install / Add to Home Screen) skips that step entirely going forward.</div>`
+  // Once actually linked to a file, the topbar status line already confirms it on every page —
+  // repeating a long explainer on Home every time is just noise at that point, so it only shows
+  // while there's something to act on. The Create/Open menu under "Connect Data File" now also
+  // carries most of the explanation, so this can stay short.
+  const fileNote = fileStatus === 'linked' ? '' : fsApiSupported
+    ? `<div class="banner info">💾 Not saving permanently yet — click <b>&nbsp;Connect Data File&nbsp;</b> above to create or resume a file on your device. <a href="#" id="fileNoteMore">Details</a><span id="fileNoteMoreText" style="display:none;"><br><br>Picking or creating the file is the only permission step. Occasionally, after closing and reopening the browser, it may need one quick reconfirmation — if the status bar above shows a warning, click <b>"Reconnect Data File"</b> (a one-click confirmation, not re-picking the file). Installing this app (browser menu → Install / Add to Home Screen) skips that step entirely going forward.</span></div>`
     : `<div class="banner">⚠ This browser doesn't support direct-to-disk saving. Open this file in <b>Chrome</b> or <b>Edge</b> for automatic local saving, or use <b>Export</b> / <b>Import</b> each session to carry your data forward.</div>`;
 
   function tileFor(c){
@@ -1771,6 +1776,15 @@ function attachHomeListeners(){
   document.querySelectorAll('.tile').forEach(t=>{
     t.addEventListener('click', ()=> selectTab(t.dataset.id));
   });
+  const fileNoteMore = document.getElementById('fileNoteMore');
+  if(fileNoteMore){
+    fileNoteMore.addEventListener('click', (e)=>{
+      e.preventDefault();
+      const extra = document.getElementById('fileNoteMoreText');
+      extra.style.display = extra.style.display === 'none' ? 'inline' : 'none';
+      fileNoteMore.textContent = extra.style.display === 'none' ? 'Details' : 'Hide details';
+    });
+  }
   const profName = document.getElementById('profName');
   const profRole = document.getElementById('profRole');
   const profOrg = document.getElementById('profOrg');
