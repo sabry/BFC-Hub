@@ -142,6 +142,9 @@
     flex-shrink:0;
   }
   .nav-item .dot.filled{background:var(--ok);}
+  .nav-item .update-dot{
+    width:7px;height:7px;border-radius:50%;background:var(--warn);flex-shrink:0;margin-left:4px;
+  }
   .nav-item small{color:var(--ink-soft);font-weight:400;margin-left:auto;}
   #sidebar-foot{
     border-top:1px solid var(--line);
@@ -365,6 +368,12 @@
   .link-btn:hover{text-decoration:underline;}
   .confirm-row{font-size:12px;color:var(--ink-soft);}
   .note-empty{font-size:12.5px;color:var(--ink-soft);font-style:italic;padding:4px 0 8px;}
+  .note-card.is-updated{border-color:var(--warn);background:#fdf6ea;}
+  .update-badge{
+    display:inline-block;background:var(--warn);color:#fff;
+    font-size:10px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;
+    padding:1px 7px;border-radius:20px;margin-right:7px;vertical-align:middle;
+  }
   .todo-item{
     display:flex;align-items:flex-start;gap:10px;
     padding:9px 4px;border-bottom:1px solid var(--line);
@@ -633,7 +642,7 @@ else if (typeof exports === 'object'){
 /* Set to the real date/time of the actual edit, every time the app itself (this file) is
    changed and handed off to you to push — shown (with time) near "Welcome" on Home and in the
    sidebar footer, so you can tell at a glance whether GitHub Pages is serving your latest push. */
-const APP_BUILD_DATE = "2026-08-17T17:21:08.000Z";
+const APP_BUILD_DATE = "2026-08-18T09:23:33.000Z";
 
 /* Update this once you've created a suggestions form (Google Forms or Microsoft Forms both work
    fine — a few fields like "Your name (optional)", "Your suggestion", "Which area does this
@@ -701,7 +710,7 @@ const CHAIR_CAVEATS = {
 const SPECIAL_PAGE_BACKGROUND = {
   'policy-chairs': "Scheduling note: the BTAA conference (Dec 3–5) overlaps one monthly meeting — may need to reschedule that session or find someone to fill in.",
   'coordination': "Under 2025 state legislation and Board of Trustees policy BOT-02 (\"Establishing University Policies\"), BFC/UFC resolutions are advisory only, and university policy approval runs through the system-wide Policy Executive Committee (PEC) — faculty hold only 3 of roughly 13 voting seats (the three UFC campus co-chairs; the BFC President becomes a UFC co-chair and PEC member during their presidential year). PEC does not hold public meetings; public/faculty comment on policy changes is limited to a 10-day window via policies.iu.edu (submissions to policies@iu.edu). Sources: IU policy BOT-02 (policies.iu.edu) and Indiana Daily Student reporting, Nov. 2025.",
-  'bot-policies': "The Policy Alignment Initiative's main tranche (26 university-level policies) appears largely complete as of the Aug 14, 2026 BOT-34 approval — policies.iu.edu/under-review/index.html showed nothing actively open for comment as of last check. The IU Bloomington AAUP chapter's own tracker (iubaaup.org) separately lists ACA-17 (Faculty Board of Review Uniform Standards), HR-06-80 (Remote Work), and HR-04-30 (Employee Benefit Plans) as under review, but with Feb–Apr 2026 submission dates that may now be stale — their current status is unconfirmed. This whole list is dynamic; recheck policies.iu.edu directly (it loads its under-review list dynamically, so an automated check can miss recent postings). Rough policy-making cycle: PEC gives an early heads-up once a new/revised policy is even under consideration (before it's public), then the formal step is a ~10-day public comment window on policies.iu.edu, followed by revisions and BOT approval — see the Coordination tab for how PEC/BL-CPC fit together.",
+  'bot-policies': "The Policy Alignment Initiative's main tranche (26 university-level policies) appears largely complete as of the Aug 14, 2026 BOT-34 approval — policies.iu.edu/under-review/index.html showed nothing actively open for comment as of last check, and no BOT meeting has occurred since; the next scheduled meeting is Sept. 30–Oct. 1, 2026 at IU Northwest. The three policies previously flagged as \"possibly still under review\" (via the IU Bloomington AAUP chapter's tracker, iubaaup.org) are resolved as of a week-of-Aug-17, 2026 check: ACA-17 (Faculty Board of Review Uniform Standards) was finalized with substantive revisions June 18, 2026; HR-04-30 (Employee Benefit Plans) was finalized with substantive revisions July 27, 2026; HR-06-80 (Remote Work) is untouched since Oct. 2022 and was never actually under review. This whole list is dynamic; recheck policies.iu.edu directly (it loads its under-review list dynamically, so an automated check can miss recent postings). Rough policy-making cycle: PEC gives an early heads-up once a new/revised policy is even under consideration (before it's public), then the formal step is a ~10-day public comment window on policies.iu.edu, followed by revisions and BOT approval — see the Coordination tab for how PEC/BL-CPC fit together.",
   'state-national': "This list reflects what's publicly confirmed as of last check; Indiana's legislature runs annual sessions (short/budget session in even years, ~Jan–Mar), so new bills should be expected each session and this needs periodic re-review. Interim study committee topics for the 2027 session weren't confirmable via automated search as of Aug 2026 — check iga.in.gov/2026/committees/interim directly for the current list, especially anything following up on SEA 199's low-enrollment-program review (final list due 2027).",
   'ufc-policies': "Spring 2026 (Jan–June) UFC meeting materials are hosted on a login-gated SharePoint folder, not a public URL, so the items above may be missing anything more recent than Dec 9, 2025 — check the meetings index directly (or ask a UFC representative) for what's happened since."
 };
@@ -889,7 +898,8 @@ const SPECIAL_PAGES = [
   {id:'state-national', navIcon:'🏛️', navLabel:'State / National Issues', title:'State / National Issues', intro:'State legislation and federal/national developments outside IU Bloomington that affect the faculty.', items:[
     {label:'Federal: "Duration of status" rule (replaces indefinite F-1/J-1 admission with a fixed term, ~4 years, plus 30-day grace period) — finalized by DHS July 16–17, 2026', url:'https://www.dhs.gov/news/2026/07/16/trump-administration-issues-final-rule-end-foreign-student-visa-abuse'},
     {label:'SEA 202 (2024) — tenure decisions tied to "intellectual diversity" criteria; mandatory 5-year post-tenure review for tenured faculty', url:'https://ufc.iu.edu/policies-guidelines/sea-202-questions.html'},
-    {label:'HEA 1001 (2025 state budget bill) — makes faculty senate/council resolutions advisory-only (I.C. 21-38-11-4: "Faculty governance organization actions are advisory only"); restructures the Board of Trustees (all 9 seats now gubernatorial appointments); adds tenured-faculty "productivity reviews"; bars retired/emeritus faculty from voting in governance bodies (I.C. 21-38-11-3) — this provision is under active litigation, which BFC endorsed in Sept. 2025', url:'https://law.justia.com/codes/indiana/title-21/article-38/chapter-11/section-21-38-11-4/', url2:'https://indianacapitalchronicle.com/2025/05/02/indiana-budget-bill-curbs-university-faculty-power-ties-tenure-to-new-productivity-reviews/', label2:'news coverage'},
+    {label:'HEA 1001 (2025 state budget bill) — makes faculty senate/council resolutions advisory-only (I.C. 21-38-11-4: "Faculty governance organization actions are advisory only"); restructures the Board of Trustees (all 9 seats now gubernatorial appointments); adds tenured-faculty "productivity reviews"; bars retired/emeritus faculty from voting in governance bodies (I.C. 21-38-11-3) — BFC endorsed litigation Sept. 2025. Two active suits: Sherman v. IU BOT (emeritus voting ban, Monroe Circuit 53C08-2508-PL-002317) still pending on the merits after injunction denial (Sept. 2025); Vasel v. State (alumni-elected trustee seats) lost on summary judgment July 13, 2026 (state upheld), decision may be appealed', url:'https://law.justia.com/codes/indiana/title-21/article-38/chapter-11/section-21-38-11-4/', url2:'https://www.ipm.org/news/2026-07-13/judge-upholds-indiana-law-removing-alumni-elected-members-from-iu-board', label2:'litigation update'},
+    {label:'HEA 1001 program-review outcome (April 2026) — Indiana Commission for Higher Education reports ~580 of 1,000+ reviewed degree programs statewide eliminated or consolidated under HEA 1001\'s graduation-count thresholds; no IU Bloomington-specific figures published. Separate from SEA 199\'s low-earning-program review, which still awaits a 2027 federal wage-data list', url:'https://www.chalkbeat.org/indiana/2026/04/01/indiana-public-universities-eliminate-hundreds-of-degree-programs/'},
     {label:'SEA 289 (2025) — removes the requirement that public university boards maintain diversity committees; revises minority-scholarship eligibility criteria (note: IU\'s own DEI office closures in May 2025 went further than this law strictly required)', url:'https://www.wfyi.org/news/articles/legislature-approves-bill-banning-diversity-equity-inclusion-in-government-and-schools'},
     {label:'SEA 199 (2026) — state review of low-enrollment/low-earning-outcome degree programs; could affect some IU Bloomington programs; final list due 2027', url:'https://www.idsnews.com/article/2026/02/indiana-universtiy-degree-programs-low-earning-statehouse-folklore'},
     {label:'SEA 76 (2026) — bars postsecondary institutions from limiting cooperation with immigration enforcement; civil penalties up to $10,000/violation', url:'https://indianacapitalchronicle.com/2026/02/27/last-day-of-the-2026-legislative-session/'},
@@ -898,6 +908,35 @@ const SPECIAL_PAGES = [
 ];
 const SPECIAL_PAGE_IDS = SPECIAL_PAGES.map(p=>p.id);
 const specialPageById = Object.fromEntries(SPECIAL_PAGES.map(p=>[p.id,p]));
+
+/* Tracked items live in the tracked_items table (see migrateSeedTrackedItems), copied in once from
+   the arrays above the first time a given device ever opens the app. After that first seed, this
+   file's SPECIAL_PAGES content and a device's actual data are two separate things — editing an item
+   above and shipping a new build reaches nobody who has already used the app (their one-time seed
+   already ran). CONTENT_UPDATES is how a fix reaches those people too, without clobbering anything
+   they've since edited or deleted themselves. Add one entry here for every future change you want
+   existing users (anyone already using the app, not just future new installs) to actually receive:
+
+   {id:'unique-slug', type:'update', pageId:'coordination', match:{label:'old exact label text', url:'old exact url or empty string'}, next:{label:'new label', url:'new url', url2:'', label2:''}}
+     — only touches a row if label+url still match EXACTLY (i.e. nobody's edited it since); silently
+       skipped otherwise, same philosophy as migrateChairEmailCorrections() below.
+   {id:'unique-slug', type:'add', pageId:'coordination', item:{label:'...', url:'...', url2:'', label2:''}}
+     — inserts only if no row with that exact (pageId, label) already exists. Use this both for a
+       single new item on an existing page, and for every item on a brand-new SPECIAL_PAGES entry
+       (a new page id) — either way, one 'add' per item is all that's needed.
+   {id:'unique-slug', type:'remove', pageId:'coordination', match:{label:'old exact label text', url:'old exact url or empty string'}}
+     — deletes only on an exact match, so an item the user has edited to say something different is
+       left alone (their edit implies it still matters to them) rather than silently vanishing.
+
+   Each id is applied at most once per device, ever (tracked in settings as 'cu_<id>'), regardless of
+   order or how many you add over time. Safe to leave this array empty when there's nothing pending. */
+const CONTENT_UPDATES = [
+  {id:'weekly-check-2026-08-17-hea1001-litigation', type:'update', pageId:'state-national',
+    match:{label:'HEA 1001 (2025 state budget bill) — makes faculty senate/council resolutions advisory-only (I.C. 21-38-11-4: "Faculty governance organization actions are advisory only"); restructures the Board of Trustees (all 9 seats now gubernatorial appointments); adds tenured-faculty "productivity reviews"; bars retired/emeritus faculty from voting in governance bodies (I.C. 21-38-11-3) — this provision is under active litigation, which BFC endorsed in Sept. 2025', url:'https://law.justia.com/codes/indiana/title-21/article-38/chapter-11/section-21-38-11-4/'},
+    next:{label:'HEA 1001 (2025 state budget bill) — makes faculty senate/council resolutions advisory-only (I.C. 21-38-11-4: "Faculty governance organization actions are advisory only"); restructures the Board of Trustees (all 9 seats now gubernatorial appointments); adds tenured-faculty "productivity reviews"; bars retired/emeritus faculty from voting in governance bodies (I.C. 21-38-11-3) — BFC endorsed litigation Sept. 2025. Two active suits: Sherman v. IU BOT (emeritus voting ban, Monroe Circuit 53C08-2508-PL-002317) still pending on the merits after injunction denial (Sept. 2025); Vasel v. State (alumni-elected trustee seats) lost on summary judgment July 13, 2026 (state upheld), decision may be appealed', url:'https://law.justia.com/codes/indiana/title-21/article-38/chapter-11/section-21-38-11-4/', url2:'https://www.ipm.org/news/2026-07-13/judge-upholds-indiana-law-removing-alumni-elected-members-from-iu-board', label2:'litigation update'}},
+  {id:'weekly-check-2026-08-17-hea1001-program-cuts', type:'add', pageId:'state-national',
+    item:{label:'HEA 1001 program-review outcome (April 2026) — Indiana Commission for Higher Education reports ~580 of 1,000+ reviewed degree programs statewide eliminated or consolidated under HEA 1001\'s graduation-count thresholds; no IU Bloomington-specific figures published. Separate from SEA 199\'s low-earning-program review, which still awaits a 2027 federal wage-data list', url:'https://www.chalkbeat.org/indiana/2026/04/01/indiana-public-universities-eliminate-hundreds-of-degree-programs/'}}
+];
 
 /* Five officers of the Bloomington Faculty per the Constitution & Bylaws (BL-ACA-D9). President,
    President-Elect, and Past President rotate together as a three-year cycle (the President-Elect
@@ -1032,13 +1071,26 @@ function ensureSchema(){
     url2 TEXT DEFAULT '',
     label2 TEXT DEFAULT '',
     created_at TEXT NOT NULL,
-    updated_at TEXT NOT NULL
+    updated_at TEXT NOT NULL,
+    cu_id TEXT DEFAULT NULL,
+    cu_applied_at TEXT DEFAULT NULL
   );`);
   db.run(`CREATE INDEX IF NOT EXISTS idx_tracked_items_page ON tracked_items(page_id);`);
+  // migrate DBs saved before the cu_id/cu_applied_at columns existed (these power the
+  // "Updated" badge — see CONTENT_UPDATE_HIGHLIGHT_DAYS below)
+  const trackedCols = queryAll("PRAGMA table_info(tracked_items)");
+  if(!trackedCols.some(c=>c.name==='cu_id')){
+    db.run(`ALTER TABLE tracked_items ADD COLUMN cu_id TEXT DEFAULT NULL`);
+  }
+  if(!trackedCols.some(c=>c.name==='cu_applied_at')){
+    db.run(`ALTER TABLE tracked_items ADD COLUMN cu_applied_at TEXT DEFAULT NULL`);
+  }
   migrateOldSeedTimestamp();
   migrateRemoveLegacySeedNotes();
   migrateChairEmailCorrections();
   migrateSeedTrackedItems();
+  applyContentUpdates();
+  migrateBackfillCuStamps();
   seedDefaults();
 }
 
@@ -1059,6 +1111,66 @@ function migrateSeedTrackedItems(){
     });
   });
   setSetting('tracked_items_seeded_v1', 'true');
+}
+
+// Runs every CONTENT_UPDATES entry (see the array's own comment above for the format) that this
+// device hasn't already applied. Each id is a one-time ticket, tracked in settings as 'cu_<id>' —
+// running this on every load is safe and cheap; already-applied entries are skipped instantly.
+// On a brand-new device this mostly finds nothing to do (migrateSeedTrackedItems() above already
+// seeded current content), but marking entries applied here too keeps every device's applied-set
+// consistent regardless of when they first opened the app.
+function applyContentUpdates(){
+  CONTENT_UPDATES.forEach(u=>{
+    const flagKey = 'cu_' + u.id;
+    if(getSetting(flagKey, null)){ return; }
+    if(u.type === 'update'){
+      const now = new Date().toISOString();
+      // cu_id/cu_applied_at stamp this row as "just refreshed by BFC Hub" — renderTrackedItemCard()
+      // and the sidebar use them to show a temporary "Updated" badge/dot (see
+      // CONTENT_UPDATE_HIGHLIGHT_DAYS) so a new content-update is easy to spot without hunting
+      // through every page. The badge clears itself automatically after the window, or immediately
+      // if you edit the item yourself (updateTrackedItem() below resets these two columns).
+      db.run(
+        `UPDATE tracked_items SET label=?, url=?, url2=?, label2=?, updated_at=?, cu_id=?, cu_applied_at=? WHERE page_id=? AND label=? AND url=?`,
+        [u.next.label, u.next.url||'', u.next.url2||'', u.next.label2||'', now, u.id, now, u.pageId, u.match.label, u.match.url||'']
+      );
+    } else if(u.type === 'add'){
+      const exists = queryOne('SELECT id FROM tracked_items WHERE page_id = ? AND label = ?', [u.pageId, u.item.label]);
+      if(!exists){
+        const now = new Date().toISOString();
+        db.run(
+          `INSERT INTO tracked_items (page_id, label, url, url2, label2, created_at, updated_at, cu_id, cu_applied_at) VALUES (?,?,?,?,?,?,?,?,?)`,
+          [u.pageId, u.item.label, u.item.url||'', u.item.url2||'', u.item.label2||'', now, now, u.id, now]
+        );
+      }
+    } else if(u.type === 'remove'){
+      db.run(`DELETE FROM tracked_items WHERE page_id = ? AND label = ? AND url = ?`, [u.pageId, u.match.label, u.match.url||'']);
+    }
+    setSetting(flagKey, 'true');
+  });
+}
+
+// One-time backfill for the "Updated" badge feature: any CONTENT_UPDATES entry that was already
+// applied on this device (its 'cu_<id>' flag is set) before cu_id/cu_applied_at existed went out
+// unstamped, so applyContentUpdates() above — which skips already-applied entries — would never
+// flag it and it would never show the badge, even though it's genuinely a recent content refresh.
+// This runs once, finds the row each such entry produced, and stamps it if it's still unstamped.
+// Gated by its own one-time flag, so it never re-stamps something you've since edited yourself
+// (updateTrackedItem() clears the stamp on save — that's a deliberate "I've seen this" signal this
+// migration must not undo).
+function migrateBackfillCuStamps(){
+  if(getSetting('cu_backfill_stamps_v1', null)) return;
+  const now = new Date().toISOString();
+  CONTENT_UPDATES.forEach(u=>{
+    if(u.type === 'remove') return; // the row is gone — nothing to stamp
+    if(!getSetting('cu_' + u.id, null)) return; // never applied here — nothing to backfill
+    const label = u.type === 'update' ? u.next.label : u.item.label;
+    const row = queryOne('SELECT id, cu_applied_at FROM tracked_items WHERE page_id = ? AND label = ?', [u.pageId, label]);
+    if(row && !row.cu_applied_at){
+      db.run('UPDATE tracked_items SET cu_id=?, cu_applied_at=? WHERE id=?', [u.id, now, row.id]);
+    }
+  });
+  setSetting('cu_backfill_stamps_v1', 'true');
 }
 
 // One-time fix: a handful of chair emails were confirmed/corrected after the initial seed
@@ -1190,6 +1302,38 @@ function globalLastUpdated(){
      )`);
   return row && row.ts ? row.ts : null;
 }
+// How long a tracked item shows the amber "Updated" badge/dot after an automatic BFC Hub content
+// refresh (a CONTENT_UPDATES entry) touches it. Purely a visual aid so a just-delivered change is
+// easy to spot without opening every page — it doesn't affect the data itself, and it clears on its
+// own once the window passes (or immediately if you edit the item — see updateTrackedItem() above).
+const CONTENT_UPDATE_HIGHLIGHT_DAYS = 21;
+function isRecentlyUpdated(cuAppliedAt){
+  if(!cuAppliedAt) return false;
+  const ageMs = Date.now() - new Date(cuAppliedAt).getTime();
+  return ageMs >= 0 && ageMs < CONTENT_UPDATE_HIGHLIGHT_DAYS * 24 * 60 * 60 * 1000;
+}
+// Set of page_ids that currently have at least one "Updated" tracked item — used to put a small
+// amber dot next to the relevant sidebar entries so you can tell which pages changed at a glance.
+function pagesWithRecentUpdates(){
+  const rows = queryAll('SELECT DISTINCT page_id, cu_applied_at FROM tracked_items WHERE cu_applied_at IS NOT NULL');
+  const set = new Set();
+  rows.forEach(r=>{ if(isRecentlyUpdated(r.cu_applied_at)) set.add(r.page_id); });
+  return set;
+}
+// Every currently-"Updated" tracked item across the whole app, most recent first — feeds the
+// "Recently Updated" card on Home so there's one place that lists everything a content refresh
+// just changed, instead of having to notice the sidebar dots page by page.
+function recentlyUpdatedItems(){
+  const rows = queryAll('SELECT id, page_id, label, cu_applied_at FROM tracked_items WHERE cu_applied_at IS NOT NULL ORDER BY cu_applied_at DESC');
+  return rows.filter(r=>isRecentlyUpdated(r.cu_applied_at));
+}
+function pageDisplayName(pageId){
+  if(pageId === BFCWIDE_ID) return '📣 BFC-Wide Channel';
+  if(pageId === GENERAL_NOTES_ID) return '📝 General Notes';
+  if(byId[pageId]) return `${byId[pageId].abbr} — ${byId[pageId].name}`;
+  if(specialPageById[pageId]) return `${specialPageById[pageId].navIcon} ${specialPageById[pageId].navLabel}`;
+  return pageId;
+}
 function getNotes(committeeId){
   return queryAll('SELECT id, body, created_at, updated_at FROM notes WHERE committee_id = ? ORDER BY created_at DESC', [committeeId]);
 }
@@ -1216,7 +1360,7 @@ function totalNoteCount(){
    etc.) — unlike Notes, these aren't private, they're the page's actual content. url2/label2 hold an
    optional second link (used for e.g. a policy's direct text alongside a news-coverage link). */
 function getTrackedItems(pageId){
-  return queryAll('SELECT id, label, url, url2, label2, created_at, updated_at FROM tracked_items WHERE page_id = ? ORDER BY id ASC', [pageId]);
+  return queryAll('SELECT id, label, url, url2, label2, created_at, updated_at, cu_applied_at FROM tracked_items WHERE page_id = ? ORDER BY id ASC', [pageId]);
 }
 function addTrackedItem(pageId, label, url, url2, label2){
   const now = new Date().toISOString();
@@ -1224,7 +1368,9 @@ function addTrackedItem(pageId, label, url, url2, label2){
 }
 function updateTrackedItem(id, label, url, url2, label2){
   const now = new Date().toISOString();
-  db.run('UPDATE tracked_items SET label=?, url=?, url2=?, label2=?, updated_at=? WHERE id=?', [label, url||'', url2||'', label2||'', now, id]);
+  // Editing it yourself counts as "seen" — clear the cu_applied_at "Updated" badge flag so it
+  // doesn't linger on something you've already reviewed/revised.
+  db.run('UPDATE tracked_items SET label=?, url=?, url2=?, label2=?, updated_at=?, cu_id=NULL, cu_applied_at=NULL WHERE id=?', [label, url||'', url2||'', label2||'', now, id]);
 }
 function deleteTrackedItemById(id){
   db.run('DELETE FROM tracked_items WHERE id = ?', [id]);
@@ -1615,13 +1761,15 @@ function renderSidebar(){
   const term = searchTerm.trim().toLowerCase();
   const filterFn = (level) => (c) => (!term || c.name.toLowerCase().includes(term) || c.abbr.toLowerCase().includes(term)) && matchesFilter(c, level);
 
+  const updatedPages = pagesWithRecentUpdates();
+
   let html = '';
   html += navItem('home', '🏠 Home', null);
   html += navItem(TODOS_ID, '✅ To-Do List', todoCount() > 0);
-  html += navItem(GENERAL_NOTES_ID, '📝 General Notes', noteCount(GENERAL_NOTES_ID) > 0);
+  html += navItem(GENERAL_NOTES_ID, '📝 General Notes', noteCount(GENERAL_NOTES_ID) > 0, null, updatedPages.has(GENERAL_NOTES_ID));
   const showBfcWide = activeFilter==='all' || activeFilter==='bfc' || (activeFilter==='notes' && noteCount(BFCWIDE_ID) > 0);
   if(showBfcWide){
-    html += navItem('bfcwide', '📣 BFC-Wide Channel', noteCount(BFCWIDE_ID) > 0);
+    html += navItem('bfcwide', '📣 BFC-Wide Channel', noteCount(BFCWIDE_ID) > 0, null, updatedPages.has(BFCWIDE_ID));
   }
 
   const bfcAllFiltered = BFC_COMMITTEES.filter(filterFn('BFC'));
@@ -1629,27 +1777,27 @@ function renderSidebar(){
   const bfcStandingFiltered = bfcAllFiltered.filter(c=>!BFC_LEADERSHIP_IDS.includes(c.id));
   if(bfcLeadershipFiltered.length){
     html += `<div class="nav-group-label">BFC Leadership Committees</div>`;
-    html += bfcLeadershipFiltered.map(c=>navItem(c.id, c.name, committeeHasData(c.id), c.abbr)).join('');
+    html += bfcLeadershipFiltered.map(c=>navItem(c.id, c.name, committeeHasData(c.id), c.abbr, updatedPages.has(c.id))).join('');
   }
   if(bfcStandingFiltered.length){
     html += `<div class="nav-group-label">BFC Standing Committees</div>`;
-    html += bfcStandingFiltered.map(c=>navItem(c.id, c.name, committeeHasData(c.id), c.abbr)).join('');
+    html += bfcStandingFiltered.map(c=>navItem(c.id, c.name, committeeHasData(c.id), c.abbr, updatedPages.has(c.id))).join('');
   }
   const electedFiltered = BFC_ELECTED_COMMITTEES.filter(filterFn('BFC-ELECTED'));
   if(electedFiltered.length){
     html += `<div class="nav-group-label">BFC Elected Committees</div>`;
-    html += electedFiltered.map(c=>navItem(c.id, c.name, committeeHasData(c.id), c.abbr)).join('');
+    html += electedFiltered.map(c=>navItem(c.id, c.name, committeeHasData(c.id), c.abbr, updatedPages.has(c.id))).join('');
   }
   const ufcAllFiltered = UFC_COMMITTEES.filter(filterFn('UFC'));
   const ufcExecFiltered = ufcAllFiltered.filter(c=>UFC_EXEC_IDS.includes(c.id));
   const ufcStandingFiltered = ufcAllFiltered.filter(c=>!UFC_EXEC_IDS.includes(c.id));
   if(ufcExecFiltered.length){
     html += `<div class="nav-group-label">UFC Executive Committee</div>`;
-    html += ufcExecFiltered.map(c=>navItem(c.id, c.name, committeeHasData(c.id), c.abbr)).join('');
+    html += ufcExecFiltered.map(c=>navItem(c.id, c.name, committeeHasData(c.id), c.abbr, updatedPages.has(c.id))).join('');
   }
   if(ufcStandingFiltered.length){
     html += `<div class="nav-group-label">UFC Standing Committees</div>`;
-    html += ufcStandingFiltered.map(c=>navItem(c.id, c.name, committeeHasData(c.id), c.abbr)).join('');
+    html += ufcStandingFiltered.map(c=>navItem(c.id, c.name, committeeHasData(c.id), c.abbr, updatedPages.has(c.id))).join('');
   }
   if(!bfcLeadershipFiltered.length && !bfcStandingFiltered.length && !electedFiltered.length && !ufcExecFiltered.length && !ufcStandingFiltered.length){
     const reason = term ? `match "${escapeHtml(searchTerm)}"` : 'match this filter';
@@ -1661,7 +1809,7 @@ function renderSidebar(){
     const refItems = activeFilter==='notes' ? SPECIAL_PAGES.filter(p=>noteCount(p.id) > 0) : SPECIAL_PAGES;
     if(refItems.length){
       html += `<div class="nav-group-label">Agenda &amp; Coordination</div>`;
-      html += refItems.map(p=>navItem(p.id, `${p.navIcon} ${p.navLabel}`, noteCount(p.id) > 0)).join('');
+      html += refItems.map(p=>navItem(p.id, `${p.navIcon} ${p.navLabel}`, noteCount(p.id) > 0, null, updatedPages.has(p.id))).join('');
     }
   }
   nav.innerHTML = html;
@@ -1671,10 +1819,11 @@ function renderSidebar(){
   });
 }
 
-function navItem(id, label, filled, abbr){
+function navItem(id, label, filled, abbr, hasUpdate){
   const active = id===currentTab ? 'active' : '';
   const dotHtml = filled===null ? '' : `<span class="dot ${filled?'filled':''}"></span>`;
-  return `<div class="nav-item ${active}" data-id="${id}">${dotHtml}<span>${escapeHtml(label)}</span>${abbr?`<small>${abbr}</small>`:''}</div>`;
+  const updateHtml = hasUpdate ? `<span class="update-dot" title="Recently updated content"></span>` : '';
+  return `<div class="nav-item ${active}" data-id="${id}">${dotHtml}<span>${escapeHtml(label)}</span>${updateHtml}${abbr?`<small>${abbr}</small>`:''}</div>`;
 }
 
 /* ---------------- Rendering: Main ---------------- */
@@ -1802,6 +1951,21 @@ function renderHome(){
   const profile = getProfile();
   const globalUpd = globalLastUpdated();
 
+  // One place to see everything an automatic content refresh just changed, instead of having to
+  // notice the amber sidebar dots page by page. Self-clears after CONTENT_UPDATE_HIGHLIGHT_DAYS,
+  // or sooner per-item as each one gets edited (see updateTrackedItem()).
+  const recentUpdates = recentlyUpdatedItems();
+  const recentUpdatesCard = recentUpdates.length ? `
+      <div class="card" style="border:1px solid var(--warn);background:#fdf6ea;">
+        <h2>🆕 Recently Updated <span class="note-count" style="background:var(--warn);color:#fff;">${recentUpdates.length}</span></h2>
+        <p class="note-small" style="margin:-4px 0 10px;">Content refreshed automatically in the last ${CONTENT_UPDATE_HIGHLIGHT_DAYS} days — tap one to jump to it.</p>
+        <div class="grid">${recentUpdates.map(r=>`<div class="tile" data-id="${r.page_id}">
+          <div class="tname">${escapeHtml(pageDisplayName(r.page_id))}</div>
+          <div class="tstat"><span style="color:var(--ink-soft);">${escapeHtml(r.label.length > 110 ? r.label.slice(0,110) + '…' : r.label)}</span></div>
+        </div>`).join('')}</div>
+      </div>
+  ` : '';
+
   return `
     <div class="page" style="max-width:960px;">
       <div class="page-head"><h1>Welcome, ${escapeHtml(profile.name)}</h1></div>
@@ -1809,6 +1973,8 @@ function renderHome(){
       <p class="note-small" style="margin:-8px 0 6px;">App updated ${appBuildLabel()}</p>
 
       ${fileNote}
+
+      ${recentUpdatesCard}
 
       <div class="card" style="border:2px solid var(--crimson);background:#fff8f6;">
         <h2>💬 Suggest something for the BFC officers to work on</h2>
@@ -2160,10 +2326,12 @@ function renderTrackedItemsSection(pageId, backgroundNote){
 }
 
 function renderTrackedItemCard(it){
+  const isNew = isRecentlyUpdated(it.cu_applied_at);
   const linkHtml = it.url ? `<a href="${it.url}" target="_blank" rel="noopener">${escapeHtml(it.label)} ↗</a>` : escapeHtml(it.label);
   const secondaryHtml = it.url2 ? ` <a href="${it.url2}" target="_blank" rel="noopener" class="note-small" style="white-space:nowrap;">(${escapeHtml(it.label2 || 'coverage')} ↗)</a>` : '';
-  return `<div class="note-card" data-id="${it.id}">
-     <div class="note-body" data-role="view">${linkHtml}${secondaryHtml}</div>
+  const badgeHtml = isNew ? `<span class="update-badge" title="Refreshed by an automatic BFC Hub content update">Updated</span>` : '';
+  return `<div class="note-card ${isNew ? 'is-updated' : ''}" data-id="${it.id}">
+     <div class="note-body" data-role="view">${badgeHtml}${linkHtml}${secondaryHtml}</div>
      <div data-role="edit" style="display:none;">
        <textarea class="note-edit" data-role="edit-label" rows="2">${escapeHtml(it.label)}</textarea>
        <input type="url" data-role="edit-url" value="${escapeHtml(it.url||'')}" placeholder="Link (optional)" style="width:100%;margin-top:6px;">
