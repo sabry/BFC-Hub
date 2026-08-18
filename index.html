@@ -432,6 +432,7 @@
       <div id="connectMenu">
         <button class="dropdown-item" id="createFileBtn">🆕 Create new file<span>First time here — start fresh</span></button>
         <button class="dropdown-item" id="openFileBtn">📂 Open existing file<span>Resume a <code>bfc-hub-data.sqlite</code> you already have</span></button>
+        <div style="padding:8px 10px 4px;font-size:11px;color:var(--ink-soft);line-height:1.5;border-top:1px solid var(--line);margin-top:4px;">Your browser will ask to confirm access to this file next — that's a standard local-file permission (same as any app asking to open a file on your computer). The site name it shows just identifies this app; the file itself stays on your device and is never uploaded anywhere.</div>
       </div>
     </div>
     <button class="btn" id="exportBtn" title="Download your own local copy as a .sqlite file">⬇ Export</button>
@@ -642,7 +643,7 @@ else if (typeof exports === 'object'){
 /* Set to the real date/time of the actual edit, every time the app itself (this file) is
    changed and handed off to you to push — shown (with time) near "Welcome" on Home and in the
    sidebar footer, so you can tell at a glance whether GitHub Pages is serving your latest push. */
-const APP_BUILD_DATE = "2026-08-18T09:23:33.000Z";
+const APP_BUILD_DATE = "2026-08-18T09:40:45.000Z";
 
 /* Update this once you've created a suggestions form (Google Forms or Microsoft Forms both work
    fine — a few fields like "Your name (optional)", "Your suggestion", "Which area does this
@@ -1913,7 +1914,7 @@ function renderHome(){
   // while there's something to act on. The Create/Open menu under "Connect Data File" now also
   // carries most of the explanation, so this can stay short.
   const fileNote = fileStatus === 'linked' ? '' : fsApiSupported
-    ? `<div class="banner info">💾 Not saving permanently yet — click <b>&nbsp;Connect Data File&nbsp;</b> above to create or resume a file on your device. <a href="#" id="fileNoteMore">Details</a><span id="fileNoteMoreText" style="display:none;"><br><br>Picking or creating the file is the only permission step. Occasionally, after closing and reopening the browser, it may need one quick reconfirmation — if the status bar above shows a warning, click <b>"Reconnect Data File"</b> (a one-click confirmation, not re-picking the file). Installing this app (browser menu → Install / Add to Home Screen) skips that step entirely going forward.</span></div>`
+    ? `<div class="banner info">💾 Not saving permanently yet — click <b>&nbsp;Connect Data File&nbsp;</b> above to create or resume a file on your device. <a href="#" id="fileNoteMore">Details</a><span id="fileNoteMoreText" style="display:none;"><br><br>Picking or creating the file is the only permission step. Occasionally, after closing and reopening the browser, it may need one quick reconfirmation — if the status bar above shows a warning, click <b>"Reconnect Data File"</b> (a one-click confirmation, not re-picking the file). Installing this app (browser menu → Install / Add to Home Screen) skips that step entirely going forward.<br><br>That permission prompt names the site (e.g. "sabry.github.io wants to...") the same way any browser permission does — it doesn't mean your file leaves your computer. The file lives only on your own device; nothing is ever uploaded to GitHub or anywhere else.</span></div>`
     : `<div class="banner">⚠ This browser doesn't support direct-to-disk saving. Open this file in <b>Chrome</b> or <b>Edge</b> for automatic local saving, or use <b>Export</b> / <b>Import</b> each session to carry your data forward.</div>`;
 
   function tileFor(c){
@@ -2223,6 +2224,7 @@ function renderTodos(){
 
       <div class="card">
         <h2>Items <span class="note-count">${todos.length}</span></h2>
+        <div class="note-small" style="margin:-4px 0 12px;">🔒 Private to you — to-dos are saved only on your own device (or the file you connect), never uploaded or visible to anyone else who opens this page.</div>
         <div id="todoList">${items}</div>
       </div>
     </div>
