@@ -643,7 +643,7 @@ else if (typeof exports === 'object'){
 /* Set to the real date/time of the actual edit, every time the app itself (this file) is
    changed and handed off to you to push — shown (with time) near "Welcome" on Home and in the
    sidebar footer, so you can tell at a glance whether GitHub Pages is serving your latest push. */
-const APP_BUILD_DATE = "2026-08-19T12:49:40.000Z";
+const APP_BUILD_DATE = "2026-08-19T13:11:17.000Z";
 
 /* Update this once you've created a suggestions form (Google Forms or Microsoft Forms both work
    fine — a few fields like "Your name (optional)", "Your suggestion", "Which area does this
@@ -1675,17 +1675,24 @@ function escapeHtml(str){
   return (str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 // Notes are freeform text (unlike Tracked Items, which have real url/url2 fields rendered as
-// <a> tags) — a pasted URL inside a note body used to render as inert text. This escapes the body
-// exactly like escapeHtml() and then wraps any http(s):// URL it finds in a real link, so pasting a
-// Teams/listserv/reference link into a note just works without needing to promote it to a tracked
-// item first.
+// <a> tags) — a pasted URL or email address inside a note body used to render as inert text. This
+// escapes the body exactly like escapeHtml() and then wraps any http(s):// URL, mailto: link, or
+// bare email address (e.g. a listserv address) it finds in a real link, so pasting one into a note
+// just works without needing to promote it to a tracked item first. Single combined pass so a URL's
+// own text is never re-scanned for an email match once it's already been turned into a link.
 function linkifyHtml(str){
   const escaped = escapeHtml(str);
-  return escaped.replace(/(https?:\/\/[^\s<]+)/g, (url)=>{
-    const trailMatch = url.match(/[.,;:)\]>]+$/);
+  return escaped.replace(/(https?:\/\/[^\s<]+)|(mailto:[^\s<]+)|([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,})/g, (match)=>{
+    const trailMatch = match.match(/[.,;:)\]>]+$/);
     const trail = trailMatch ? trailMatch[0] : '';
-    const clean = trail ? url.slice(0, -trail.length) : url;
-    return `<a href="${clean}" target="_blank" rel="noopener">${clean}</a>${trail}`;
+    const clean = trail ? match.slice(0, -trail.length) : match;
+    if(/^https?:\/\//.test(clean)){
+      return `<a href="${clean}" target="_blank" rel="noopener">${clean}</a>${trail}`;
+    }
+    if(/^mailto:/.test(clean)){
+      return `<a href="${clean}">${clean.slice(7)}</a>${trail}`;
+    }
+    return `<a href="mailto:${clean}">${clean}</a>${trail}`;
   });
 }
 function formatDateTime(iso){
@@ -2686,6 +2693,58 @@ document.getElementById('menuToggle').addEventListener('click', toggleSidebar);
 document.getElementById('sidebarCloseBtn').addEventListener('click', closeSidebar);
 document.getElementById('sidebar-backdrop').addEventListener('click', closeSidebar);
 initPullToRefresh();
+initNavScrollBrowse();
+
+// "Scroll to browse": lets you page through every committee/page just by scrolling the sidebar
+// list, instead of clicking each one — as you scroll, whichever nav item has most recently
+// scrolled to the top of the visible list becomes the open page. #nav's own children get replaced
+// on every renderSidebar() call, but #nav itself is a fixed element in the page shell, so this
+// listener only needs to be attached once, here, rather than re-attached on every render.
+function initNavScrollBrowse(){
+  const nav = document.getElementById('nav');
+  let debounceTimer = null;
+  nav.addEventListener('scroll', ()=>{
+    clearTimeout(debounceTimer);
+    // Wait for scrolling to settle rather than reacting to every pixel — switching pages is a
+    // real re-render (queries the DB, rebuilds #main), so firing continuously mid-scroll would
+    // be both wasteful and janky. A short pause after the scroll stops reads as "I've arrived."
+    debounceTimer = setTimeout(()=>{
+      const navTop = nav.getBoundingClientRect().top;
+      const items = nav.querySelectorAll('.nav-item');
+      if(!items.length) return;
+      // Standard scrollspy walk: step down the list (already top-to-bottom in the DOM) and keep
+      // updating the pick to the last item whose top has scrolled up to/past the container's top
+      // edge. That's "the most recent item you scrolled past" — the natural read of what's
+      // "current" while scrolling down a list, and it still works scrolling back up since the
+      // same rule just resolves to an earlier item.
+      let chosen = items[0];
+      for(const el of items){
+        if(el.getBoundingClientRect().top <= navTop + 6){
+          chosen = el;
+        } else {
+          break;
+        }
+      }
+      const id = chosen.dataset.id;
+      if(id && id !== currentTab) selectTabFromScroll(id);
+    }, 180);
+  });
+}
+
+// A lighter-weight sibling of selectTab() for the scroll-browse listener above: updates the main
+// content and the active highlight, but skips selectTab()'s history.pushState/navPos bookkeeping
+// (scrolling past a dozen committees shouldn't create a dozen Back-button stops) and skips
+// rebuilding the sidebar's own HTML (which would be wasteful mid-scroll and would fight the very
+// scroll position driving this). The URL hash still updates via replaceState, so refreshing or
+// sharing the link lands you back on whatever you last scrolled to.
+function selectTabFromScroll(id){
+  currentTab = id;
+  renderMain();
+  document.querySelectorAll('#nav .nav-item').forEach(el=>{
+    el.classList.toggle('active', el.dataset.id === id);
+  });
+  history.replaceState({navPos, tab:id}, '', '#'+id);
+}
 
 // Custom pull-to-refresh: the browser's native gesture never fires here (the outer page doesn't
 // scroll — #main scrolls internally so the sidebar/topbar stay put — and installed/standalone
