@@ -129,7 +129,11 @@
     color:var(--ink);
     border-left:3px solid transparent;
   }
-  .nav-item:hover{background:var(--crimson-light);}
+  /* Hover uses a distinctly subtler tint than .active's crimson highlight — they used to share the
+     same background color, so as the mouse drifted across rows while scrolling, whatever it passed
+     over flashed the exact same look as the truly-selected item, making the selection appear to
+     jump around even when it hadn't actually changed. */
+  .nav-item:hover{background:var(--cream);}
   .nav-item.active{
     background:var(--crimson-light);
     border-left-color:var(--crimson);
@@ -643,7 +647,7 @@ else if (typeof exports === 'object'){
 /* Set to the real date/time of the actual edit, every time the app itself (this file) is
    changed and handed off to you to push — shown (with time) near "Welcome" on Home and in the
    sidebar footer, so you can tell at a glance whether GitHub Pages is serving your latest push. */
-const APP_BUILD_DATE = "2026-08-19T13:40:23.000Z";
+const APP_BUILD_DATE = "2026-08-19T13:52:39.000Z";
 
 /* Update this once you've created a suggestions form (Google Forms or Microsoft Forms both work
    fine — a few fields like "Your name (optional)", "Your suggestion", "Which area does this
@@ -2732,18 +2736,24 @@ function initNavScrollBrowse(){
 }
 
 // A lighter-weight sibling of selectTab() for the scroll-browse listener above: updates the main
-// content and the active highlight, but skips selectTab()'s history.pushState/navPos bookkeeping
-// (scrolling past a dozen committees shouldn't create a dozen Back-button stops) and skips
-// rebuilding the sidebar's own HTML (which would be wasteful mid-scroll and would fight the very
-// scroll position driving this). The URL hash still updates via replaceState, so refreshing or
-// sharing the link lands you back on whatever you last scrolled to.
+// content and the active highlight without rebuilding the sidebar's own HTML (which would be
+// wasteful mid-scroll and would fight the very scroll position driving this). It DOES still push a
+// real history entry per page, same as a click — using replaceState here seemed like a reasonable
+// way to avoid piling up a Back-button stop for every committee scrolled past, but it backfires:
+// since scrolling never advances navPos, it keeps overwriting the same single stack entry, so
+// hitting Back skips over everything you scrolled through in one jump and lands wherever you were
+// before you started scrolling (reported as "the back button jumps quite far"). A real stop per
+// page, exactly like clicking gets, is what makes Back step through pages the way you'd expect.
 function selectTabFromScroll(id){
   currentTab = id;
   renderMain();
   document.querySelectorAll('#nav .nav-item').forEach(el=>{
     el.classList.toggle('active', el.dataset.id === id);
   });
-  history.replaceState({navPos, tab:id}, '', '#'+id);
+  navPos++;
+  navMax = navPos;
+  history.pushState({navPos, tab:id}, '', '#'+id);
+  updateNavButtons();
 }
 
 // Custom pull-to-refresh: the browser's native gesture never fires here (the outer page doesn't
