@@ -110,17 +110,7 @@
     outline:none;
   }
   #search:focus{border-color:var(--crimson);}
-  /* scroll-snap-type makes the browser itself land the scroll position exactly on a committee row
-     boundary every time you stop scrolling — no in-between/partial state, no JS guessing where you
-     landed. That's what makes scrolling actually "jump between committee names" instead of gliding
-     to an arbitrary position. "mandatory" sounds like the stronger choice, but on real trackpads it
-     fights the browser's own inertial scrolling: small gestures can get snap-locked (the scroll
-     visually refuses to move, showing only the grey overscroll glow), and a bigger gesture then
-     overshoots to whatever snap point the built-up momentum lands on, which reads as randomly
-     jumping several rows. "proximity" only snaps once a scroll gesture has already come to rest
-     near a row boundary, so it never fights an in-progress scroll — trackpad scrolling stays smooth,
-     and it still settles cleanly on a row once you stop. */
-  #nav{flex:1;overflow-y:auto;padding:8px 0 8px;scroll-snap-type:y proximity;}
+  #nav{flex:1;overflow-y:auto;padding:8px 0 8px;}
   .nav-group-label{
     font-size:11px;
     text-transform:uppercase;
@@ -138,14 +128,7 @@
     cursor:pointer;
     color:var(--ink);
     border-left:3px solid transparent;
-    scroll-snap-align:start;
   }
-  /* Bottom padding so the last handful of committees can actually reach a fully-snapped position at
-     the top of the list too — without it, scroll-snap has the exact same problem a forced scroll
-     would: there's no more content below those rows to scroll past, so the browser clamps short and
-     they can never land cleanly at the top. This is just breathing room in the scrollable area, not
-     JS forcing anything — the browser's own snapping still decides where scrolling actually lands. */
-  #navBottomSpacer{scroll-snap-align:none;}
   /* Hover uses a distinctly subtler tint than .active's crimson highlight — they used to share the
      same background color, so as the mouse drifted across rows while scrolling, whatever it passed
      over flashed the exact same look as the truly-selected item, making the selection appear to
@@ -664,7 +647,7 @@ else if (typeof exports === 'object'){
 /* Set to the real date/time of the actual edit, every time the app itself (this file) is
    changed and handed off to you to push — shown (with time) near "Welcome" on Home and in the
    sidebar footer, so you can tell at a glance whether GitHub Pages is serving your latest push. */
-const APP_BUILD_DATE = "2026-08-19T14:31:30.000Z";
+const APP_BUILD_DATE = "2026-08-19T14:41:41.000Z";
 
 /* Update this once you've created a suggestions form (Google Forms or Microsoft Forms both work
    fine — a few fields like "Your name (optional)", "Your suggestion", "Which area does this
@@ -1855,9 +1838,7 @@ function renderSidebar(){
       html += refItems.map(p=>navItem(p.id, `${p.navIcon} ${p.navLabel}`, noteCount(p.id) > 0, null, updatedPages.has(p.id))).join('');
     }
   }
-  html += `<div id="navBottomSpacer" style="height:70vh;" aria-hidden="true"></div>`;
   nav.innerHTML = html;
-  navLastSidebarRenderAt = Date.now();
 
   nav.querySelectorAll('.nav-item').forEach(el=>{
     el.addEventListener('click', ()=>{
@@ -1880,7 +1861,7 @@ function navItem(id, label, filled, abbr, hasUpdate){
   // tabindex: only the currently-selected item is normally reachable by Tab (the standard
   // "roving tabindex" pattern for a list like this) — the rest sit at -1 so Tab doesn't have to
   // step through every single committee to get past the sidebar. Once focus is inside the list,
-  // ArrowUp/ArrowDown move it (see the keydown handler below), same as clicking or scrolling would.
+  // ArrowUp/ArrowDown move it (see the keydown handler below), same as clicking would.
   const tabindex = id===currentTab ? '0' : '-1';
   return `<div class="nav-item ${active}" data-id="${id}" tabindex="${tabindex}" role="option" aria-selected="${id===currentTab}">${dotHtml}<span>${escapeHtml(label)}</span>${updateHtml}${abbr?`<small>${abbr}</small>`:''}</div>`;
 }
@@ -1889,16 +1870,6 @@ function navItem(id, label, filled, abbr, hasUpdate){
 
 let navPos = 0;
 let navMax = 0;
-
-// Rebuilding the sidebar's HTML (nav.innerHTML = ...) can itself trigger a spurious native
-// 'scroll' event on #nav a few dozen ms later (the browser settling scroll-snap layout against
-// the new content) even though scrollTop barely moves and no one touched anything. The scroll
-// listener below can't tell that apart from a real scroll just by looking at scrollTop, so it
-// needs an independent signal for "did a person actually scroll this." We stamp the moment of
-// the last real user gesture on #nav (wheel/touch/mouse/keyboard) and the moment of the last full
-// sidebar rebuild; the scroll handler only acts if a gesture happened *after* the last rebuild.
-let navLastUserGestureAt = 0;
-let navLastSidebarRenderAt = 0;
 
 function selectTab(id){
   currentTab = id;
@@ -2740,76 +2711,7 @@ document.getElementById('menuToggle').addEventListener('click', toggleSidebar);
 document.getElementById('sidebarCloseBtn').addEventListener('click', closeSidebar);
 document.getElementById('sidebar-backdrop').addEventListener('click', closeSidebar);
 initPullToRefresh();
-initNavScrollBrowse();
 initNavKeyboardBrowse();
-
-// "Scroll to browse": lets you page through every committee/page just by scrolling the sidebar
-// list, instead of clicking each one — as you scroll, whichever nav item has most recently
-// scrolled to the top of the visible list becomes the open page. #nav's own children get replaced
-// on every renderSidebar() call, but #nav itself is a fixed element in the page shell, so this
-// listener only needs to be attached once, here, rather than re-attached on every render.
-function initNavScrollBrowse(){
-  const nav = document.getElementById('nav');
-  let debounceTimer = null;
-  // Any of these on #nav means a person is actually driving the scroll (mouse wheel, touch drag,
-  // dragging the scrollbar thumb, or arrow/Page keys while the list has focus). Only these should
-  // ever let scrolling change the selected page — see the comment on navLastUserGestureAt above.
-  ['wheel','touchstart','touchmove','mousedown','keydown'].forEach(evt=>{
-    nav.addEventListener(evt, ()=>{ navLastUserGestureAt = Date.now(); }, {passive:true});
-  });
-  nav.addEventListener('scroll', ()=>{
-    clearTimeout(debounceTimer);
-    // Wait for scrolling to settle rather than reacting to every pixel — switching pages is a
-    // real re-render (queries the DB, rebuilds #main), so firing continuously mid-scroll would
-    // be both wasteful and janky. A short pause after the scroll stops reads as "I've arrived."
-    debounceTimer = setTimeout(()=>{
-      // Ignore scroll events that aren't traceable to a real user gesture since the sidebar was
-      // last fully rebuilt (page load, hash restore, Back/Forward, search/filter). Rebuilding
-      // nav.innerHTML can itself fire a native 'scroll' event on #nav shortly after, and reacting
-      // to that would silently override whatever page was just correctly selected.
-      if(navLastUserGestureAt < navLastSidebarRenderAt) return;
-      const navTop = nav.getBoundingClientRect().top;
-      const items = nav.querySelectorAll('.nav-item');
-      if(!items.length) return;
-      // Standard scrollspy walk: step down the list (already top-to-bottom in the DOM) and keep
-      // updating the pick to the last item whose top has scrolled up to/past the container's top
-      // edge. That's "the most recent item you scrolled past" — the natural read of what's
-      // "current" while scrolling down a list, and it still works scrolling back up since the
-      // same rule just resolves to an earlier item.
-      let chosen = items[0];
-      for(const el of items){
-        if(el.getBoundingClientRect().top <= navTop + 6){
-          chosen = el;
-        } else {
-          break;
-        }
-      }
-      const id = chosen.dataset.id;
-      if(id && id !== currentTab) selectTabFromScroll(id);
-    }, 180);
-  });
-}
-
-// A lighter-weight sibling of selectTab() for the scroll-browse listener above: updates the main
-// content and the active highlight without rebuilding the sidebar's own HTML (which would be
-// wasteful mid-scroll and would fight the very scroll position driving this). It DOES still push a
-// real history entry per page, same as a click — using replaceState here seemed like a reasonable
-// way to avoid piling up a Back-button stop for every committee scrolled past, but it backfires:
-// since scrolling never advances navPos, it keeps overwriting the same single stack entry, so
-// hitting Back skips over everything you scrolled through in one jump and lands wherever you were
-// before you started scrolling (reported as "the back button jumps quite far"). A real stop per
-// page, exactly like clicking gets, is what makes Back step through pages the way you'd expect.
-function selectTabFromScroll(id){
-  currentTab = id;
-  renderMain();
-  document.querySelectorAll('#nav .nav-item').forEach(el=>{
-    el.classList.toggle('active', el.dataset.id === id);
-  });
-  navPos++;
-  navMax = navPos;
-  history.pushState({navPos, tab:id}, '', '#'+id);
-  updateNavButtons();
-}
 
 // Standard listbox keyboard navigation: once a nav item has focus (click it, or Tab into the
 // list), ArrowDown/ArrowUp move the selection to the next/previous item — the way arrow keys work
