@@ -113,9 +113,14 @@
   /* scroll-snap-type makes the browser itself land the scroll position exactly on a committee row
      boundary every time you stop scrolling — no in-between/partial state, no JS guessing where you
      landed. That's what makes scrolling actually "jump between committee names" instead of gliding
-     to an arbitrary position. "mandatory" (vs. "proximity") guarantees it always snaps somewhere,
-     never rests half-between two rows. */
-  #nav{flex:1;overflow-y:auto;padding:8px 0 8px;scroll-snap-type:y mandatory;}
+     to an arbitrary position. "mandatory" sounds like the stronger choice, but on real trackpads it
+     fights the browser's own inertial scrolling: small gestures can get snap-locked (the scroll
+     visually refuses to move, showing only the grey overscroll glow), and a bigger gesture then
+     overshoots to whatever snap point the built-up momentum lands on, which reads as randomly
+     jumping several rows. "proximity" only snaps once a scroll gesture has already come to rest
+     near a row boundary, so it never fights an in-progress scroll — trackpad scrolling stays smooth,
+     and it still settles cleanly on a row once you stop. */
+  #nav{flex:1;overflow-y:auto;padding:8px 0 8px;scroll-snap-type:y proximity;}
   .nav-group-label{
     font-size:11px;
     text-transform:uppercase;
@@ -659,7 +664,7 @@ else if (typeof exports === 'object'){
 /* Set to the real date/time of the actual edit, every time the app itself (this file) is
    changed and handed off to you to push — shown (with time) near "Welcome" on Home and in the
    sidebar footer, so you can tell at a glance whether GitHub Pages is serving your latest push. */
-const APP_BUILD_DATE = "2026-08-19T15:30:00.000Z";
+const APP_BUILD_DATE = "2026-08-19T16:15:00.000Z";
 
 /* Update this once you've created a suggestions form (Google Forms or Microsoft Forms both work
    fine — a few fields like "Your name (optional)", "Your suggestion", "Which area does this
