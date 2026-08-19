@@ -643,7 +643,7 @@ else if (typeof exports === 'object'){
 /* Set to the real date/time of the actual edit, every time the app itself (this file) is
    changed and handed off to you to push — shown (with time) near "Welcome" on Home and in the
    sidebar footer, so you can tell at a glance whether GitHub Pages is serving your latest push. */
-const APP_BUILD_DATE = "2026-08-19T13:30:35.000Z";
+const APP_BUILD_DATE = "2026-08-19T13:40:23.000Z";
 
 /* Update this once you've created a suggestions form (Google Forms or Microsoft Forms both work
    fine — a few fields like "Your name (optional)", "Your suggestion", "Which area does this
@@ -1834,15 +1834,6 @@ function renderSidebar(){
       html += refItems.map(p=>navItem(p.id, `${p.navIcon} ${p.navLabel}`, noteCount(p.id) > 0, null, updatedPages.has(p.id))).join('');
     }
   }
-  // Without this, scrollIntoView({block:'start'}) can't fully align any item in roughly the last
-  // screenful of the list — the container simply runs out of content to scroll past, and clamps at
-  // max scrollTop, leaving that item stranded partway down instead of at the top. That's what made
-  // "click a committee, then scroll" feel out of sync: the click's anchor scroll never actually
-  // reached the top for committees late in the list, so the very next scroll (based on whatever was
-  // genuinely at the top) jumped to an unrelated item instead of the one just clicked. Padding the
-  // scrollable area with empty space equal to a full nav height guarantees every real item,
-  // including the last one, has enough room below it to be scrolled all the way to the top.
-  html += `<div id="navBottomSpacer" style="height:100vh;" aria-hidden="true"></div>`;
   nav.innerHTML = html;
 
   nav.querySelectorAll('.nav-item').forEach(el=>{
@@ -1871,20 +1862,6 @@ function selectTab(id){
   history.pushState({navPos, tab:id}, '', '#'+id);
   updateNavButtons();
   closeSidebar(); // no-op on desktop widths; on phones, picking a page should show it, not the menu
-  scrollNavItemIntoView(id);
-}
-
-// Anchors the sidebar's own scroll position on whichever item just became active, so "scroll to
-// browse" (see initNavScrollBrowse()) always continues from where you actually are. Without this,
-// clicking a committee that's mid-list leaves the sidebar's scroll position wherever it happened to
-// be, so the very next scroll (up OR down) would jump to whatever's nearest the top of that old
-// position instead of stepping to the committee right before/after the one just picked — reported
-// as the sidebar and the open page "getting out of sync." Only called from real navigation (click,
-// initial load, Back/Forward) — never from the scroll-browse handler itself, which would otherwise
-// fight the scroll that's driving it.
-function scrollNavItemIntoView(id){
-  const el = document.querySelector(`.nav-item[data-id="${id}"]`);
-  if(el) el.scrollIntoView({block:'start'});
 }
 
 function openSidebar(){
@@ -1909,7 +1886,6 @@ function initTab(){
   navMax = 0;
   history.replaceState({navPos:0, tab:startTab}, '', '#'+startTab);
   updateNavButtons();
-  scrollNavItemIntoView(startTab);
 }
 
 window.addEventListener('popstate', (e)=>{
@@ -1919,7 +1895,6 @@ window.addEventListener('popstate', (e)=>{
   renderMain();
   if(e.state && typeof e.state.navPos === 'number'){ navPos = e.state.navPos; }
   updateNavButtons();
-  scrollNavItemIntoView(tab);
 });
 
 function updateNavButtons(){
